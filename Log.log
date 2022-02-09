@@ -1,0 +1,33 @@
+2022-01-08 00:08:58,251 [    INFO] Start
+2022-01-08 00:11:14,473 [   ERROR] 2022-02-26 00:00:00
+2022-01-08 00:11:14,473 [   ERROR] Message: chrome not reachable
+  (Session info: headless chrome=97.0.4692.71)
+Stacktrace:
+#0 0x556700828a23 <unknown>
+#1 0x5567002f3caf <unknown>
+#2 0x5567002e2aa4 <unknown>
+#3 0x5567002e34a9 <unknown>
+#4 0x5567002e51f2 <unknown>
+#5 0x5567002dd976 <unknown>
+#6 0x5567002f5212 <unknown>
+#7 0x55670035a311 <unknown>
+#8 0x556700347883 <unknown>
+#9 0x55670031d3fa <unknown>
+#10 0x55670031e4c5 <unknown>
+#11 0x55670085816d <unknown>
+#12 0x55670086e5bb <unknown>
+#13 0x556700859e75 <unknown>
+#14 0x55670086ee85 <unknown>
+#15 0x55670084d86f <unknown>
+#16 0x556700889ae8 <unknown>
+#17 0x556700889c68 <unknown>
+#18 0x5567008a4aad <unknown>
+#19 0x7f802353c609 <unknown>
+
+2022-01-08 00:11:14,473 [    INFO] Process: 136 secs
+2022-01-08 00:11:14,486 [    INFO] wait for 1 minutes
+2022-01-08 00:12:14,546 [    INFO] wait for 2 minutes
+2022-01-08 00:13:14,609 [    INFO] wait for 3 minutes
+2022-01-11 22:48:10,244 [    INFO] Start
+2022-01-11 22:51:13,869 [    INFO] Start
+2022-01-11 22:55:17,258 [    INFO] Start
