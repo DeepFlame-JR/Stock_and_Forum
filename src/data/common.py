@@ -44,7 +44,7 @@ class Database():
     def createDB(self, schema, table, datatype):
         counter = TimeCounter('Create Time')
         sql = " CREATE TABLE {schema}.{table} ({datatype})"\
-            .format(schema=schema, table=table, datatype = datatype)
+            .format(schema=schema, table=table, datatype=datatype)
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -74,7 +74,7 @@ class Database():
         counter = TimeCounter('read Time')
         if condition:
             sql = " SELECT {column} from {schema}.{table} where {condition}" \
-                .format(column=column, schema=schema, table=table, condition = condition)
+                .format(column=column, schema=schema, table=table, condition=condition)
         else:
             sql = " SELECT {column} from {schema}.{table}" \
                 .format(column=column, schema=schema, table=table)

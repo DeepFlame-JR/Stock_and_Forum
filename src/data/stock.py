@@ -55,6 +55,7 @@ def get_stock(code, start_time, end_time, time_frame='day'):
 if __name__ == '__main__':
     db = common.Database('stockdb')
     db.insertDB(schema='public', table='kospi200', data=get_KOSPI200())
-    df_kospi200 = pd.DataFrame(db.readDB(schema='public', table='kospi200', column='*'), columns=db.get_columns(table='kospi200'))
-    db.insertDB(schema='public', table='stock', data=get_stocks(df_kospi200.stock_code))
-
+    kospi200_list = db.readDB(schema='public', table='kospi200', column='stock_code',
+                              condition="date='%s'" % (datetime.date.today()))
+    kospi200_list = list(map(lambda x: x[0], kospi200_list))
+    db.insertDB(schema='public', table='stock', data=get_stocks(kospi200_list))
