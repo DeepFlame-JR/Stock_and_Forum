@@ -31,6 +31,11 @@ def get_KOSPI200():
     time_counter.end()
     return result
 
+# KOSDAQ 50 가져오기 (date, stock_code, stock_name, market_cap)
+def get_KOSDAQ():
+
+    return 0
+
 # 주가 가져오기
 # https://joycecoder.tistory.com/107
 def get_stocks(kospi200_list, date = datetime.date.today()):
