@@ -69,3 +69,10 @@ db.commit()
 db.close()
 cursor.close()
 '''
+
+url = 'https://finance.naver.com/item/board_read.naver?code=091990&nid=213764637&st=&sw=&page=4'
+r = requests.get(url)
+soup = BeautifulSoup(r.content, 'html.parser')
+print(soup)
+# table = soup.select_one('#cbox_module_wai_u_cbox_content_wrap_tabpanel')
+# print(table)
