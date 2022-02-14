@@ -7,7 +7,7 @@ from urllib import parse
 from ast import literal_eval
 import re, requests
 
-# date, content, id, view, like, dislike + response(like, dislike, response)
+# date, title, id, view, like, dislike + response(like, dislike, response)
 def get_forum(url, start_date, end_date):
     def get_response(url):
         return 0

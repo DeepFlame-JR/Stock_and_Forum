@@ -11,7 +11,7 @@ class TimeCounter():
     def end(self):
         print("%s: %.5f secs" % (self.title, time.time() - self.start_time))
 
-# Postgre SQL DB 클래스 작성
+# Postgre SQL DB 클래스 정의
 # 참고: https://edudeveloper.tistory.com/131
 class PostgreSQL():
     def __init__(self, name):
@@ -111,7 +111,7 @@ class PostgreSQL():
             print("delete DB err", e)
         counter.end()
 
-# MongoDB SQL DB 클래서 작성
+# MongoDB SQL DB 클래스 정의
 # 참고: https://popcorn16.tistory.com/122
 class DBHandler:
     def __init__(self):

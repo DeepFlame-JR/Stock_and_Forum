@@ -70,9 +70,9 @@ db.close()
 cursor.close()
 '''
 
-url = 'https://finance.naver.com/item/board_read.naver?code=091990&nid=213764637&st=&sw=&page=4'
-r = requests.get(url)
-soup = BeautifulSoup(r.content, 'html.parser')
-print(soup)
-# table = soup.select_one('#cbox_module_wai_u_cbox_content_wrap_tabpanel')
+url = 'https://finance.naver.com/item/board_read.naver?code=091990&nid=213875960&st=&sw=&page=4'
+r = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
+soup = BeautifulSoup(r.text, 'lxml')
+content = soup.select_one('#body')
+print(content.getText())
 # print(table)
