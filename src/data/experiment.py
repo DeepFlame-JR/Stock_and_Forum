@@ -1,8 +1,10 @@
 import time
 import psycopg2
-import requests, re
+import requests, re, common
 from bs4 import BeautifulSoup
 import datetime
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 '''
 # Insert 실험
@@ -70,9 +72,76 @@ db.close()
 cursor.close()
 '''
 
-url = 'https://finance.naver.com/item/board_read.naver?code=091990&nid=213875960&st=&sw=&page=4'
-r = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
-soup = BeautifulSoup(r.text, 'lxml')
-content = soup.select_one('#body')
-print(content.getText())
-# print(table)
+# 네이버 조목토론방
+try:
+
+    url = 'https://finance.naver.com/item/board_read.naver?code=091990&nid=214154852&st=&sw=&page=2'
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    driver = webdriver.Chrome('./chromedriver.exe')#, options=options)
+    driver.get(url)
+
+    # counter1 = common.TimeCounter('test')
+
+    # reply_count = item.find('span',{'class' : 'u_cbox_reply_cnt'})
+    # counter1.end()
+    #
+    # print(reply_count)
+    # print(int(reply_count.text))
+    # print(item)
+
+    result = dict()
+
+    counter2 = common.TimeCounter('test')
+    ass = driver.find_elements_by_tag_name('a')
+
+    replies = driver.find_elements_by_class_name('u_cbox_btn_reply')
+    for reply in replies:
+        reply_count = int(reply.text.split()[1])
+        if reply_count > 0:
+            reply.click()
+            time.sleep(0.05)
+
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    content = soup.select_one('#body')
+
+    response = soup.find('div', {'class':'u_cbox_content_wrap'})
+    items = response.find_all('li')
+
+    item = items[7]
+    content = item.find('span', {'class':'u_cbox_contents'})
+    # if content == None:
+    #     return
+    result['content'] = content.text
+    result['like'] = int(item.find('em', {'class':'u_cbox_cnt_recomm'}).text)
+    result['dislike'] = int(item.find('em', {'class': 'u_cbox_cnt_unrecomm'}).text)
+
+    sub_response = []
+    lis = item.find_all('li')
+    for li in lis:
+        temp = dict()
+        content = li.find('span', {'class': 'u_cbox_contents'})
+        if content == None:
+            continue
+        temp['content'] = content.text
+        temp['like'] = int(item.find('em', {'class':'u_cbox_cnt_recomm'}).text)
+        temp['dislike'] = int(item.find('em', {'class': 'u_cbox_cnt_unrecomm'}).text)
+        sub_response.append(temp)
+    result['response'] = sub_response
+    print(result)
+    counter2.end()
+
+except Exception as e:
+    print(e)
+finally:
+    time.sleep(1)
+    # driver.quit()
+
+# # url = 'https://finance.naver.com/item/board.naver?code=091990'
+# r = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
+# print(r.text)
+# soup = BeautifulSoup(r.text, 'lxml')
+# # print(soup)
+# # print(table)
