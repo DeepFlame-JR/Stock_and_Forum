@@ -1,6 +1,6 @@
 import time
 import psycopg2
-import requests, re, common
+import requests, re
 from bs4 import BeautifulSoup
 import datetime
 from selenium import webdriver
