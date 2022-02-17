@@ -3,17 +3,17 @@ import psycopg2
 from pymongo import MongoClient
 from pymongo.cursor import CursorType
 
-class TimeCounter():
+class TimeCounter:
     def __init__(self, title):
         self.title = title
         self.start_time = time.time()
 
-    def end(self):
-        print("%s: %.5f secs" % (self.title, time.time() - self.start_time))
+    def end(self, content=""):
+        print("%s %s: %.5f secs" % (self.title, content, time.time() - self.start_time))
 
 # Postgre SQL DB 클래스 정의
 # 참고: https://edudeveloper.tistory.com/131
-class PostgreSQL():
+class PostgreSQL:
     def __init__(self, name):
         try:
             self.db = psycopg2.connect(host='localhost', dbname=name, user='postgres', password='postgres', port=5432)
@@ -113,7 +113,7 @@ class PostgreSQL():
 
 # MongoDB SQL DB 클래스 정의
 # 참고: https://popcorn16.tistory.com/122
-class DBHandler:
+class MongoDB:
     def __init__(self):
         host = "localhost"
         port = "27017"

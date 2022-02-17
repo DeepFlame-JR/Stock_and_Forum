@@ -31,7 +31,7 @@ def get_KOSPI200():
     time_counter.end()
     return result
 
-# KOSDAQ 50 가져오기 (date, name, code, price, gap, gap_ratio, trading_volume, market_cap, foreign_ratio, forum_url)
+# KOSDAQ 50 가져오기 (date, code, name, price, gap, gap_ratio, trading_volume, market_cap, foreign_ratio, forum_url)
 # https://appia.tistory.com/734
 def get_KOSDAQ50():
     def get_KOSDAQ(item):
