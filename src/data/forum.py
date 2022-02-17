@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from util import database
+from util import database, common
 
 import datetime
 import pandas as pd
@@ -110,12 +110,12 @@ if __name__ == '__main__':
                               condition="date='%s'" % (datetime.date.today()))
 
     today, yesterday = datetime.date.today(), datetime.date.today() - datetime.timedelta(days=-1)
-    start_date, end_date = datetime.datetime.combine(today, datetime.time(12,00,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
+    start_date, end_date = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
     nosqlDB = database.MongoDB()
-    forum_counter = database.TimeCounter('Get Forum Time')
+    forum_counter = common.TimeCounter('Get Forum Time')
     for stock in kosdaq_list:
         date, code, name, forum_url = stock
-        inner_counter = database.TimeCounter(name)
+        inner_counter = common.TimeCounter(name)
         forum = get_forum(code, name, forum_url, start_date, end_date)
         if len(forum) > 0:
             nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')

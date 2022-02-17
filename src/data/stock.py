@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from util import database
+from util import database, common
 
 import datetime
 import pandas as pd
@@ -12,7 +12,7 @@ import re, requests
 
 # KOSPI 200 가져오기 (date, stock_code, stock_name)
 def get_KOSPI200():
-    time_counter = database.TimeCounter('Get KOSPI200 Time')
+    time_counter = common.TimeCounter('Get KOSPI200 Time')
     result = []
 
     BaseURL = 'https://finance.naver.com/sise/entryJongmok.nhn?&page='
@@ -53,7 +53,7 @@ def get_KOSDAQ50():
         except Exception as e:
             print(e)
             return None
-    time_counter = database.TimeCounter('Get KOSDAQ50 Time')
+    time_counter = common.TimeCounter('Get KOSDAQ50 Time')
     url = 'https://finance.naver.com/sise/sise_market_sum.naver?sosok=1&page=1'
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
@@ -79,7 +79,7 @@ def get_stocks(kospi200_list, date = datetime.date.today()):
         r = requests.get(url)
         return tuple([start_time, code] + literal_eval(r.text.strip())[1][1:])
 
-    time_counter = database.TimeCounter('Get KOSPI200 Time')
+    time_counter = common.TimeCounter('Get KOSPI200 Time')
     result = list(map(lambda x: get_stock(x, date, date + datetime.timedelta(days=1)), kospi200_list))
     time_counter.end()
     return result
