@@ -86,7 +86,7 @@ def get_stocks(kospi200_list, date = datetime.date.today()):
 
 if __name__ == '__main__':
     db = database.PostgreSQL('stockdb')
-    db.insertDB(schema='public', table='kodaq', data=get_KOSDAQ50())
+    db.insertDB(schema='public', table='kosdaq', data=get_KOSDAQ50())
     kosdaq_list = db.readDB(schema='public', table='kodaq', column='*',
                               condition="date='%s'" % (datetime.date.today()))
     print(kosdaq_list)

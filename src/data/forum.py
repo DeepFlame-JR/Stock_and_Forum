@@ -105,15 +105,19 @@ def get_forum(code, name, forum_url, start_date, end_date):
             driver.quit()
 
 if __name__ == '__main__':
+    # KOSDAQ 불러오기
     sqlDB = database.PostgreSQL('stockdb')
     kosdaq_list = sqlDB.readDB(schema='public', table='kodaq', column='date, code, name, forum_url',
                               condition="date='%s'" % (datetime.date.today()))
 
+    # 일자 설정
     today, yesterday = datetime.date.today(), datetime.date.today() - datetime.timedelta(days=-1)
     start_date, end_date = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
+
+    # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
     nosqlDB = database.MongoDB()
     forum_counter = common.TimeCounter('Get Forum Time')
-    for stock in kosdaq_list:
+    for stock in kosdaq_list[4:]:
         date, code, name, forum_url = stock
         inner_counter = common.TimeCounter(name)
         forum = get_forum(code, name, forum_url, start_date, end_date)

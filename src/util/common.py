@@ -6,4 +6,4 @@ class TimeCounter:
         self.start_time = time.time()
 
     def end(self, content=""):
-        print("%s %s: %.5f secs" % (self.title, content, time.time() - self.start_time))
+        print("%s %s : %.5f secs" % (self.title, content, time.time() - self.start_time))

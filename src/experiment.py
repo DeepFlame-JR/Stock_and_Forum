@@ -7,6 +7,12 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from util import common
 
+import sys, os
+print(os.path.dirname(__file__))
+print(os.path.abspath(os.path.dirname(__file__)))
+print(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 '''
 # Insert 실험
 N = 100000

@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append((os.path.dirname(__file__)))
+import common
 import psycopg2
 from pymongo import MongoClient
 from pymongo.cursor import CursorType
@@ -34,7 +37,6 @@ class PostgreSQL:
         return result
 
     def createDB(self, schema, table, datatype):
-        counter = TimeCounter('Create Time')
         sql = " CREATE TABLE {schema}.{table} ({datatype})"\
             .format(schema=schema, table=table, datatype=datatype)
         try:
@@ -42,17 +44,15 @@ class PostgreSQL:
             self.db.commit()
         except Exception as e:
             print("Create Error: ", e)
-        counter.end()
 
     def insertDB(self, schema, table, data):
-        counter = TimeCounter('Insert Time')
+        counter = common.TimeCounter('Insert %s in PostgreSQL' % table)
         column_str = '%s,' * len(data[0])
         column_str = '(' + column_str[:-1] + ')'
 
         args_str = ", ".join([self.cursor.mogrify(column_str, row).decode('utf-8') for row in data])
         sql = "INSERT INTO {schema}.{table} VALUES {data};"\
             .format(schema=schema, table=table, data=args_str)
-
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -60,10 +60,11 @@ class PostgreSQL:
             self.db.rollback()
             self.db.close()
             print("Insert Error: ", e)
-        counter.end()
+        finally:
+            counter.end()
 
     def readDB(self, schema, table, column, condition = None):
-        counter = TimeCounter('read Time')
+        counter = common.TimeCounter('Read %s in PostgreSQL' % table)
         if condition:
             sql = " SELECT {column} from {schema}.{table} where {condition}" \
                 .format(column=column, schema=schema, table=table, condition=condition)
@@ -75,11 +76,12 @@ class PostgreSQL:
             result = self.cursor.fetchall()
         except Exception as e:
             result = (" read DB err", e)
-        counter.end()
+        finally:
+            counter.end()
         return result
 
     def updateDB(self,schema,table,column,value,condition):
-        counter = TimeCounter('update Time')
+        counter = common.TimeCounter('Update %s in PostgreSQL' % table)
         sql = " UPDATE {schema}.{table} SET {column}='{value}' WHERE {column}='{condition}' "\
             .format(schema=schema, table=table , column=column ,value=value,condition=condition )
         try :
@@ -87,10 +89,11 @@ class PostgreSQL:
             self.db.commit()
         except Exception as e :
             print(" update DB err",e)
-        counter.end()
+        finally:
+            counter.end()
 
     def deleteDB(self, schema, table, condition):
-        counter = TimeCounter('delete Time')
+        counter = common.TimeCounter('Delete %s in PostgreSQL' % table)
         sql = " delete from {schema}.{table} where {condition} ; "\
             .format(schema=schema, table=table, condition=condition)
         try:
@@ -100,7 +103,8 @@ class PostgreSQL:
             self.db.rollback()
             self.db.close()
             print("delete DB err", e)
-        counter.end()
+        finally:
+            counter.end()
 
 # MongoDB SQL DB 클래스 정의
 # 참고: https://popcorn16.tistory.com/122
@@ -111,11 +115,15 @@ class MongoDB:
         self.client = MongoClient(host, int(port))
 
     def insert_item_one(self, data, db_name=None, collection_name=None):
+        counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)
         result = self.client[db_name][collection_name].insert_one(data).inserted_id
+        counter.end()
         return result
 
     def insert_item_many(self, datas, db_name=None, collection_name=None):
+        counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)
         result = self.client[db_name][collection_name].insert_many(datas).inserted_ids
+        counter.end()
         return result
 
     def find_item_one(self, condition=None, db_name=None, collection_name=None):
