@@ -5,13 +5,9 @@ from bs4 import BeautifulSoup
 import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from util import common
+from sqlalchemy.orm.collections import collection
 
-import sys, os
-print(os.path.dirname(__file__))
-print(os.path.abspath(os.path.dirname(__file__)))
-print(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from util import common, database
 
 '''
 # Insert 실험
@@ -121,3 +117,5 @@ cursor.close()
 # options.add_argument('--headless')
 # driver = webdriver.Chrome('./data/chromedriver.exe', options=options)
 '''
+
+

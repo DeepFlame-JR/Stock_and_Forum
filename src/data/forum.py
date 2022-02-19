@@ -14,8 +14,8 @@ import time
 inTime = True
 driver = None
 
-# date, title, id, view, like, dislike + reply(like, dislike, response)
-def get_forum(code, name, forum_url, start_date, end_date):
+# datetime, date, title, id, view, like, dislike + reply(like, dislike, response)
+def get_forum(code, name, forum_url, start_datetime, end_datetime):
     global inTime, driver
 
     def get_reply(item):
@@ -48,9 +48,9 @@ def get_forum(code, name, forum_url, start_date, end_date):
         item_infos = item.get_text().split("\n")
         item_infos = list(map(lambda x: x.replace('\t', '').replace(',', ''), item_infos))
         item_infos = list(filter(None, item_infos))
-        date = datetime.datetime.strptime(item_infos[0], '%Y.%m.%d %H:%M')
-        if not start_date <= date <= end_date:
-            if date < start_date:
+        date_time = datetime.datetime.strptime(item_infos[0], '%Y.%m.%d %H:%M')
+        if not start_datetime <= date_time <= end_datetime:
+            if date_time < start_datetime:
                 inTime &= False
             return None
 
@@ -72,17 +72,13 @@ def get_forum(code, name, forum_url, start_date, end_date):
         reply_list = list(map(lambda x:get_reply(x), items))
         reply_list = list(filter(None, reply_list))
 
-        row_dict = {'name' : name, 'code': code, 'date':date,
+        row_dict = {'name' : name, 'code': code, 'datetime':date_time,
                     'title': item_infos[1], 'content':content, 'id':item_infos[-4],
                     'view':int(item_infos[-3]), 'like':int(item_infos[-2]), 'unlike':int(item_infos[-1]),
                     'reply':reply_list, 'reply_count':len(reply_list)}
         return row_dict
 
     try:
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        driver = webdriver.Chrome('./chromedriver.exe', options=options)
-
         forum_list = []
         page = 0
         inTime = True
@@ -92,38 +88,44 @@ def get_forum(code, name, forum_url, start_date, end_date):
             soup = BeautifulSoup(r.content, 'html.parser')
             table = soup.select_one('#content > div.section.inner_sub > table.type2 > tbody')
             items = table.find_all('tr', onmouseover="mouseOver(this)")
-
             result = list(map(lambda x: get_forum_row(x), items))
             result = list(filter(None, result))
             forum_list.extend(result)
-
         return forum_list
+    except Exception as e:
+        print(e)
+
+
+if __name__ == '__main__':
+    date = datetime.date.today()
+    # KOSDAQ 불러오기
+    sqlDB = database.PostgreSQL('stockdb')
+    kosdaq_list = sqlDB.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
+                              condition="date='%s'" % date)
+    # 일자 설정
+    today, yesterday = date, date + datetime.timedelta(days=-1)
+    start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
+
+    # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
+    try:
+        forum_counter = common.TimeCounter('Get Forum Time')
+
+        nosqlDB = database.MongoDB()
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        driver = webdriver.Chrome('./chromedriver.exe', options=options)
+
+        for stock in kosdaq_list:
+            date, code, name, forum_url = stock
+            inner_counter = common.TimeCounter(name)
+            forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
+            if len(forum) > 0:
+                nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
+            inner_counter.end(str(len(forum)) + '개 ')
+        forum_counter.end()
+
     except Exception as e:
         print(e)
     finally:
         if driver:
             driver.quit()
-
-if __name__ == '__main__':
-    # KOSDAQ 불러오기
-    sqlDB = database.PostgreSQL('stockdb')
-    kosdaq_list = sqlDB.readDB(schema='public', table='kodaq', column='date, code, name, forum_url',
-                              condition="date='%s'" % (datetime.date.today()))
-
-    # 일자 설정
-    today, yesterday = datetime.date.today(), datetime.date.today() - datetime.timedelta(days=-1)
-    start_date, end_date = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
-
-    # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
-    nosqlDB = database.MongoDB()
-    forum_counter = common.TimeCounter('Get Forum Time')
-    for stock in kosdaq_list[4:]:
-        date, code, name, forum_url = stock
-        inner_counter = common.TimeCounter(name)
-        forum = get_forum(code, name, forum_url, start_date, end_date)
-        if len(forum) > 0:
-            nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
-        inner_counter.end(str(len(forum)) + '개 ')
-    forum_counter.end()
-
-
