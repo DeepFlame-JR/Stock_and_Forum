@@ -72,7 +72,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         reply_list = list(map(lambda x:get_reply(x), items))
         reply_list = list(filter(None, reply_list))
 
-        row_dict = {'name' : name, 'code': code, 'datetime':date_time,
+        row_dict = {'name' : name, 'code': code, 'datetime':date_time
                     'title': item_infos[1], 'content':content, 'id':item_infos[-4],
                     'view':int(item_infos[-3]), 'like':int(item_infos[-2]), 'unlike':int(item_infos[-1]),
                     'reply':reply_list, 'reply_count':len(reply_list)}
@@ -98,6 +98,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
 
 if __name__ == '__main__':
     date = datetime.date.today()
+
     # KOSDAQ 불러오기
     sqlDB = database.PostgreSQL('stockdb')
     kosdaq_list = sqlDB.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
@@ -115,9 +116,9 @@ if __name__ == '__main__':
         options.add_argument('--headless')
         driver = webdriver.Chrome('./chromedriver.exe', options=options)
 
-        for stock in kosdaq_list:
+        for i, stock in enumerate(kosdaq_list):
             date, code, name, forum_url = stock
-            inner_counter = common.TimeCounter(name)
+            inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
             forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
             if len(forum) > 0:
                 nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')

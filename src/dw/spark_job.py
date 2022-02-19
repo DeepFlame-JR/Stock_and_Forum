@@ -1,9 +1,4 @@
-from pyspark.sql import SQLContext
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StringType
-from pyspark.sql.types import DoubleType
-from pyspark.sql.functions import udf
-from pyspark.sql import functions as F
 import os
 
 class SparkJob(object):
@@ -35,17 +30,6 @@ class SparkJob(object):
                 .option('database', db)\
                 .option('collection', collection) \
                 .load()
-
         # filter = [{eventdtm: '202007080000'}]
         # df = spark.read.format("mongo").option("pipeline", filter).load()
         return df
-
-
-s = SparkJob()
-# df = s.sql_read('select * from kosdaq limit 10')
-# df.show()
-# df.printSchema()
-# df.select('name').show()
-
-df = s.mongodb_read('forumdb', 'naverforum')
-df.show(5)

@@ -118,4 +118,8 @@ cursor.close()
 # driver = webdriver.Chrome('./data/chromedriver.exe', options=options)
 '''
 
+mongo = database.MongoDB()
+items = mongo.find_item(db_name='forumdb', collection_name='naverforum')
 
+for item in items:
+    print(item['datetime'])
