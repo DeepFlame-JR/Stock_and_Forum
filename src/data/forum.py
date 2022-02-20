@@ -72,7 +72,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         reply_list = list(map(lambda x:get_reply(x), items))
         reply_list = list(filter(None, reply_list))
 
-        row_dict = {'name' : name, 'code': code, 'datetime':date_time
+        row_dict = {'name' : name, 'code': code, 'datetime':date_time,
                     'title': item_infos[1], 'content':content, 'id':item_infos[-4],
                     'view':int(item_infos[-3]), 'like':int(item_infos[-2]), 'unlike':int(item_infos[-1]),
                     'reply':reply_list, 'reply_count':len(reply_list)}

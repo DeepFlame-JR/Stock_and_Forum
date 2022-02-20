@@ -1,3 +1,4 @@
+import json
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
@@ -26,10 +27,10 @@ if __name__ == '__main__':
 
     agg_df = forum_df.groupby('code')\
             .agg(
-                F.count('_id').alias('total_count'),
-                F.sum('view').alias('total_view'),
-                F.sum('like').alias('total_like'),
-                F.sum('unlike').alias('total_unlike'),
+                F.count('_id').alias('forum_count'),
+                F.sum('view').alias('forum_view'),
+                F.sum('like').alias('forum_like'),
+                F.sum('unlike').alias('forum_unlike'),
                 )
 
     result = stock_df.join(agg_df, 'code', 'left')

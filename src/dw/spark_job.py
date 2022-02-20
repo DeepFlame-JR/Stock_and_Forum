@@ -1,5 +1,9 @@
-from pyspark.sql import SparkSession
-import os
+from pyspark.sql import SparkSession, HiveContext
+import sys, os, io
+os.environ['PYSPARK_PYTHON'] = sys.executable
+os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 class SparkJob(object):
     def __init__(self):
@@ -33,3 +37,16 @@ class SparkJob(object):
         # filter = [{eventdtm: '202007080000'}]
         # df = spark.read.format("mongo").option("pipeline", filter).load()
         return df
+
+class SparkforHive:
+    def __init__(self):
+        self.session = SparkSession.builder\
+            .appName('Spark for Hive')\
+            .config('hive.metastore.uris', "thrift://localhost:9083")\
+            .enableHiveSupport()\
+            .getOrCreate()
+
+
+
+
+
