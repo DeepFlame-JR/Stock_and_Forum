@@ -103,6 +103,8 @@ if __name__ == '__main__':
     sqlDB = database.PostgreSQL('stockdb')
     kosdaq_list = sqlDB.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
                               condition="date='%s'" % date)
+    print(len(kosdaq_list))
+
     # 일자 설정
     today, yesterday = date, date + datetime.timedelta(days=-1)
     start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
