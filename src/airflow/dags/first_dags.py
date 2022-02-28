@@ -19,19 +19,7 @@ dag = DAG(
     catchup=False,
     )
 
-test1 = BashOperator(task_id='test1', bash_command='python /shared/python/test1.py', dag=dag)
-test2 = BashOperator(task_id='test2', bash_command='python /shared/python/test2.py', dag=dag)
+test1 = BashOperator(task_id='test1', bash_command='python /home/toy/src/airflow/test1.py', dag=dag)
+test2 = BashOperator(task_id='test2', bash_command='python /home/toy/src/airflow/test2.py', dag=dag)
 
 test1 >> test2
-
-# db_stock = BashOperator(
-#             task_id='db_stock',
-#             bash_command='python ',
-#             dag=dag
-#             )
-#
-# db_forum = BashOperator(
-#             task_id='db_forum',
-#             bash_command='python ~/Stock_and_Forum/src/airflow',
-#             dag=dag
-#             )
