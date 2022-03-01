@@ -3,13 +3,15 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 import datetime, time
+from bs4 import BeautifulSoup
+import re, requests
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from bs4 import BeautifulSoup
-import re, requests
+
 
 inTime = True
 driver = None
@@ -56,7 +58,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
 
         driver.get('https://finance.naver.com' + item.a.get('href'))
         # 답글 버튼이 있는 경우 누르기
-        buttons = driver.find_elements_by_class_name('u_cbox_btn_reply')
+        buttons = driver.find_elements(by=By.CLASS_NAME, value='u_cbox_btn_reply')
         for button in buttons:
             reply_count = int(button.text.split()[1])
             if reply_count > 0:
@@ -115,17 +117,17 @@ if __name__ == '__main__':
         nosqlDB = database.MongoDB()
 
         options = webdriver.ChromeOptions()
-        # options.add_argument('--headless')
-        # options.add_argument('--no-sandbox')
-        # options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         for i, stock in enumerate(kosdaq_list):
             date, code, name, forum_url = stock
             inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
             forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
-            # if len(forum) > 0:
-            #     nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
+            if len(forum) > 0:
+                nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
             inner_counter.end(str(len(forum)) + '개 ')
         forum_counter.end()
 
