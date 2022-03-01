@@ -3,7 +3,6 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 import datetime
-import pandas as pd
 
 from bs4 import BeautifulSoup
 from urllib import parse

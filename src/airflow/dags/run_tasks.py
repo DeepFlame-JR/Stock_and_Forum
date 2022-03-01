@@ -1,25 +1,32 @@
-import datetime
+import datetime, pendulum
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.dates import days_ago
 
+KST = pendulum.timezone("Asia/Seoul")
 default_args = {
-    'owner': 'airflow',
-    'start_date': datetime.datetime(2022, 2, 23),
-    'retries': 2,
+    'owner': 'airflow_user',
+    'start_date': days_ago(1),
+    # 'start_date': datetime.datetime(2022, 2, 26, tzinfo=KST),
+    'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5)
     }
 
 dag = DAG(
-    dag_id='test_task',
+    dag_id='get Data',
     default_args=default_args,
-    schedule_interval='@daily'
+    schedule_interval='*/30 * * * *',  # mm hh
+    catchup=False,
     )
 
-test1 = BashOperator(task_id='test1', bash_command='python /shared/python/test1.py', dag=dag)
-test2 = BashOperator(task_id='test2', bash_command='python /shared/python/test2.py', dag=dag)
+stock = BashOperator(task_id='get stock',
+                     bash_command='python3 /home/stock_and_forum/src/data/stock.py',
+                     dag=dag)
+forum = BashOperator(task_id='get forum',
+                     bash_command='python3 /home/stock_and_forum/src/data/forum.py',
+                     dag=dag)
 
-test1 >> test2
+stock >> forum
 
 # db_stock = BashOperator(
 #             task_id='db_stock',

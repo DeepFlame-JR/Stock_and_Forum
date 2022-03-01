@@ -2,14 +2,14 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
-import datetime
-import pandas as pd
+import datetime, time
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 from bs4 import BeautifulSoup
-from urllib import parse
 import re, requests
-from selenium import webdriver
-import time
 
 inTime = True
 driver = None
@@ -112,18 +112,20 @@ if __name__ == '__main__':
     # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
     try:
         forum_counter = common.TimeCounter('Get Forum Time')
-
         nosqlDB = database.MongoDB()
+
         options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        driver = webdriver.Chrome('./chromedriver.exe', options=options)
+        # options.add_argument('--headless')
+        # options.add_argument('--no-sandbox')
+        # options.add_argument('--disable-dev-shm-usage')
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         for i, stock in enumerate(kosdaq_list):
             date, code, name, forum_url = stock
             inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
             forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
-            if len(forum) > 0:
-                nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
+            # if len(forum) > 0:
+            #     nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
             inner_counter.end(str(len(forum)) + '개 ')
         forum_counter.end()
 

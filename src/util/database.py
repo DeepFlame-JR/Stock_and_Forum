@@ -10,7 +10,7 @@ from pymongo.cursor import CursorType
 class PostgreSQL:
     def __init__(self, name):
         try:
-            self.db = psycopg2.connect(host='localhost', dbname=name, user='postgres', password='postgres', port=5432)
+            self.db = psycopg2.connect(host='localhost', dbname=name, user='postgres', password='postgres')
             self.db.set_client_encoding('utf-8')
             self.cursor = self.db.cursor()
         except:
