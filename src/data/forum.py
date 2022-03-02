@@ -1,6 +1,7 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
+import platform
 
 import datetime, time
 from bs4 import BeautifulSoup
@@ -10,8 +11,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-
-
 
 inTime = True
 driver = None
@@ -120,7 +119,10 @@ if __name__ == '__main__':
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        if 'Windows' in platform.platform():
+            driver = webdriver.Chrome('./chromedriver.exe', options=options)
+        else:
+            driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
         for i, stock in enumerate(kosdaq_list):
             date, code, name, forum_url = stock
