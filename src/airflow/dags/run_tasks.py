@@ -13,17 +13,17 @@ default_args = {
     }
 
 dag = DAG(
-    dag_id='get Data',
+    dag_id='get_Data',
     default_args=default_args,
-    schedule_interval='*/30 * * * *',  # mm hh
+    schedule_interval='30 16 * * *',  # mm hh
     catchup=False,
     )
 
-stock = BashOperator(task_id='get stock',
-                     bash_command='python3 /home/stock_and_forum/src/data/stock.py',
+stock = BashOperator(task_id='get_stock',
+                     bash_command='python3 /home/ubuntu/stock_and_forum/src/data/stock.py',
                      dag=dag)
 forum = BashOperator(task_id='get forum',
-                     bash_command='python3 /home/stock_and_forum/src/data/forum.py',
+                     bash_command='python3 /home/ubuntu/stock_and_forum/src/data/forum.py',
                      dag=dag)
 
 stock >> forum

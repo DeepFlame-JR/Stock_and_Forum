@@ -19,7 +19,7 @@ dag = DAG(
     catchup=False,
     )
 
-test1 = BashOperator(task_id='test1', bash_command='date', dag=dag)
-test2 = BashOperator(task_id='test2', bash_command='whoami', dag=dag)
+test1 = BashOperator(task_id='date', bash_command='date', dag=dag)
+test2 = BashOperator(task_id='whoami', bash_command='whoami', dag=dag)
 
 test1 >> test2
