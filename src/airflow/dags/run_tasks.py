@@ -6,8 +6,8 @@ from airflow.utils.dates import days_ago
 KST = pendulum.timezone("Asia/Seoul")
 default_args = {
     'owner': 'airflow_user',
-    'start_date': days_ago(1),
-    # 'start_date': datetime.datetime(2022, 2, 26, tzinfo=KST),
+    #'start_date': days_ago(1),
+    'start_date': datetime.datetime(2022, 3, 4, tzinfo=KST),
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5)
     }
