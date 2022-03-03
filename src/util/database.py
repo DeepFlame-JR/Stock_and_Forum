@@ -110,7 +110,7 @@ class PostgreSQL:
 # 참고: https://popcorn16.tistory.com/122
 class MongoDB:
     def __init__(self):
-        self.client = MongoClient('mongodb://mongodb:mongodb:localhost:27017/?authSource=admin')
+        self.client = MongoClient("mongodb://mongodb:mongodb@localhost:27017/?authSource=admin")
 
     def insert_item_one(self, data, db_name=None, collection_name=None):
         counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)

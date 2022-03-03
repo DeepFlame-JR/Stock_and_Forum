@@ -22,7 +22,7 @@ dag = DAG(
 stock = BashOperator(task_id='get_stock',
                      bash_command='python3 /home/ubuntu/stock_and_forum/src/data/stock.py',
                      dag=dag)
-forum = BashOperator(task_id='get forum',
+forum = BashOperator(task_id='get_forum',
                      bash_command='python3 /home/ubuntu/stock_and_forum/src/data/forum.py',
                      dag=dag)
 
