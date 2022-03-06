@@ -1,8 +1,10 @@
+import sys, os
 import datetime, pendulum
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.dates import days_ago
 
+src_folder = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 KST = pendulum.timezone("Asia/Seoul")
 default_args = {
     'owner': 'airflow_user',
@@ -20,22 +22,10 @@ dag = DAG(
     )
 
 stock = BashOperator(task_id='get_stock',
-                     bash_command='python3 /home/ubuntu/stock_and_forum/src/data/stock.py',
+                     bash_command='python3 %s/data/stock.py' % src_folder,
                      dag=dag)
 forum = BashOperator(task_id='get_forum',
-                     bash_command='python3 /home/ubuntu/stock_and_forum/src/data/forum.py',
+                     bash_command='python3 %s/data/forum.py' % src_folder,
                      dag=dag)
 
 stock >> forum
-
-# db_stock = BashOperator(
-#             task_id='db_stock',
-#             bash_command='python ',
-#             dag=dag
-#             )
-#
-# db_forum = BashOperator(
-#             task_id='db_forum',
-#             bash_command='python ~/Stock_and_Forum/src/airflow',
-#             dag=dag
-#             )

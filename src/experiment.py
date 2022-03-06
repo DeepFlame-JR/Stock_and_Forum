@@ -8,26 +8,29 @@ from selenium.webdriver.common.by import By
 from sqlalchemy.orm.collections import collection
 
 from util import common, database
-from dw import spark_job
 import pandas as pd
 
-sh = spark_job.SparkforHive()
 
-df = pd.DataFrame({
-    'id1': [1,2],
-    'id2': [3,4]
-})
-df = sh.session.createDataFrame(df)
-df.show()
+# os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 
-df_load = sh.session.sql('select * from test4')
-df_load.show()
-
-df.registerTempTable('test_df')
-sh.session.sql('insert into test4 select * from test_df')
-
-df_load = sh.session.sql('select * from test4')
-df_load.show()
+# from dw import spark_job
+# sh = spark_job.SparkforHive()
+#
+# df = pd.DataFrame({
+#     'id1': [1,2],
+#     'id2': [3,4]
+# })
+# df = sh.session.createDataFrame(df)
+# df.show()
+#
+# df_load = sh.session.sql('select * from test4')
+# df_load.show()
+#
+# df.registerTempTable('test_df')
+# sh.session.sql('insert into test4 select * from test_df')
+#
+# df_load = sh.session.sql('select * from test4')
+# df_load.show()
 
 '''
 # Insert 실험
