@@ -5,11 +5,12 @@ import platform
 
 import datetime, time
 from bs4 import BeautifulSoup
-import re, requests
+import requests
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from seleniumrequests import Chrome
 from webdriver_manager.chrome import ChromeDriverManager
 
 inTime = True
@@ -79,57 +80,52 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
                     'reply':reply_list, 'reply_count':len(reply_list)}
         return row_dict
 
-    try:
-        forum_list = []
-        page = 0
-        inTime = True
-        while inTime:
-            page += 1
-            r = requests.get(forum_url + '&page=%d' % page, headers={'User-Agent': 'Mozilla/5.0'})
-            soup = BeautifulSoup(r.content, 'html.parser')
-            table = soup.select_one('#content > div.section.inner_sub > table.type2 > tbody')
-            items = table.find_all('tr', onmouseover="mouseOver(this)")
-            result = list(map(lambda x: get_forum_row(x), items))
-            result = list(filter(None, result))
-            forum_list.extend(result)
-        return forum_list
-    except Exception as e:
-        print(e)
-
+    forum_list = []
+    page = 0
+    inTime = True
+    while inTime:
+        page += 1
+        r = requests.get(forum_url + '&page=%d' % page, headers={'User-Agent': 'Mozilla/5.0'})
+        soup = BeautifulSoup(r.content, 'html.parser')
+        table = soup.select_one('#content > div.section.inner_sub > table.type2 > tbody')
+        items = table.find_all('tr', onmouseover="mouseOver(this)")
+        result = list(map(lambda x: get_forum_row(x), items))
+        result = list(filter(None, result))
+        forum_list.extend(result)
+    return forum_list
 
 if __name__ == '__main__':
-    date = datetime.date.today()
-
-    # KOSDAQ 불러오기
-    sqlDB = database.PostgreSQL('stockdb')
-    kosdaq_list = sqlDB.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
-                              condition="date='%s'" % date)
-    print(len(kosdaq_list))
-
-    # 일자 설정
-    today, yesterday = date, date + datetime.timedelta(days=-1)
-    start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
-
-    # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
     try:
+        date = datetime.date.today()
+
+        # KOSDAQ 불러오기
+        postgres = database.PostgreSQL('stockdb')
+        kosdaq_list = postgres.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
+                                  condition="date='%s'" % date)
+        if len(kosdaq_list) == 0:
+            raise Exception('today is not the opening date')
+
+        # 일자 설정
+        today, yesterday = date, date + datetime.timedelta(days=-1)
+        start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
+
+        # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
         forum_counter = common.TimeCounter('Get Forum Time')
-        nosqlDB = database.MongoDB()
+        mongo = database.MongoDB()
 
         options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        if 'Windows' in platform.platform():
-            driver = webdriver.Chrome('./chromedriver.exe', options=options)
-        else:
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        if 'Windows' not in platform.platform():
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+        driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
         for i, stock in enumerate(kosdaq_list):
             date, code, name, forum_url = stock
             inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
             forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
             if len(forum) > 0:
-                nosqlDB.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
+                mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
             inner_counter.end(str(len(forum)) + '개 ')
         forum_counter.end()
 

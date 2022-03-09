@@ -10,11 +10,14 @@ from pymongo.cursor import CursorType
 class PostgreSQL:
     def __init__(self, name):
         try:
-            self.db = psycopg2.connect(host='localhost', dbname=name, user='postgres', password='postgres')
+            config = common.Config()
+            info = config.get("POSTGRES")
+            self.db = psycopg2.connect(host=info['ip'], dbname=name, user=info['user'], password=info['pw'])
             self.db.set_client_encoding('utf-8')
             self.cursor = self.db.cursor()
-        except:
+        except Exception as e:
             print("Not connected!")
+            print(e)
 
     def __del__(self):
         self.db.close()
@@ -110,7 +113,11 @@ class PostgreSQL:
 # 참고: https://popcorn16.tistory.com/122
 class MongoDB:
     def __init__(self):
-        self.client = MongoClient("mongodb://mongodb:mongodb@localhost:27017/?authSource=admin")
+        config = common.Config()
+        info = config.get("MONGO")
+        self.client = MongoClient("mongodb://{0}:{1}@{2}:27017/?authSource=admin"
+                                  .format(info['user'], info['pw'], info['ip'])
+                                  )
 
     def insert_item_one(self, data, db_name=None, collection_name=None):
         counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)
