@@ -1,5 +1,6 @@
 import sys, os
-sys.path.append((os.path.dirname(__file__)))
+src_folder = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+sys.path.append(src_folder)
 from util import common
 
 import datetime, pendulum
@@ -7,7 +8,6 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.utils.dates import days_ago
 
-src_folder = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 config = common.Config()
 info = config.get("EMAIL")
 

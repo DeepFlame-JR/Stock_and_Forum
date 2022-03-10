@@ -12,7 +12,8 @@ class PostgreSQL:
         try:
             config = common.Config()
             info = config.get("POSTGRES")
-            self.db = psycopg2.connect(host=info['ip'], dbname=name, user=info['user'], password=info['pw'])
+            self.db = psycopg2.connect("host='{0}' dbname='{1}' user='{2}'  password='{3}'" \
+                                       .format(info['ip'], name, info['user'], info['pw']))
             self.db.set_client_encoding('utf-8')
             self.cursor = self.db.cursor()
         except Exception as e:

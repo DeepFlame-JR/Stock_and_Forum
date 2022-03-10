@@ -13,13 +13,10 @@ class Config:
     def __init__(self):
         self.properties = parser.ConfigParser()
 
-        folder = os.getcwd()
-        path_root = os.path.join(folder, 'src', 'config.ini')
-        path_curdir = os.path.join(folder, '..', 'config.ini')
-        if os.path.exists(path_root):
-            self.properties.read(path_root)
-        elif os.path.exists(path_curdir):
-            self.properties.read(path_curdir)
+        src_folder = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+        config_path = os.path.join(src_folder, 'config.ini')
+        if os.path.exists(config_path):
+            self.properties.read(config_path)
         else:
             raise "Can not find config.ini"
 
