@@ -8,7 +8,6 @@ from selenium.webdriver.common.by import By
 from sqlalchemy.orm.collections import collection
 
 from util import common, database
-import pandas as pd
 
 
 # os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
@@ -31,6 +30,40 @@ import pandas as pd
 #
 # df_load = sh.session.sql('select * from test4')
 # df_load.show()
+
+import logging
+
+# log 생성
+logger = logging.getLogger("myLogger")
+
+# log 출력 기준 설정
+logger.setLevel(logging.INFO)
+
+# log 출력 형식
+formatter = logging.Formatter(u'%(asctime)s [%(levelname)s] %(message)s')
+
+# log 출력
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
+# log 파일에 출력
+file_handler = logging.FileHandler('./myLog.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+print("asdf")
+logger.info("Info Test")
+logger.error("Error Test")
+
+
+# if len(logger.handlers) == 0:
+#     # StreamHandler
+#     stream_handler = logging.StreamHandler()
+#     stream_handler.setFormatter(formatter)
+#
+#     logger.addHandler(stream_handler)
+#     logger.setLevel(logging.INFO)
 
 '''
 # Insert 실험

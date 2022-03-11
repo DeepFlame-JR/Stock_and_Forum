@@ -16,9 +16,10 @@ class PostgreSQL:
                                        .format(info['ip'], name, info['user'], info['pw']))
             self.db.set_client_encoding('utf-8')
             self.cursor = self.db.cursor()
+            self.Log = common.Logger(__file__)
         except Exception as e:
-            print("Not connected!")
-            print(e)
+            self.Log.error("Not Connected!")
+            self.Log.error(e)
 
     def __del__(self):
         self.db.close()
@@ -38,6 +39,7 @@ class PostgreSQL:
             result = list(map(lambda x: x[0], result))
         except Exception as e:
             result = (" read DB err", e)
+            self.Log.error(result)
         return result
 
     def createDB(self, schema, table, datatype):
@@ -47,7 +49,7 @@ class PostgreSQL:
             self.cursor.execute(sql)
             self.db.commit()
         except Exception as e:
-            print("Create Error: ", e)
+            self.Log.error("Create Error: " + str(e))
 
     def insertDB(self, schema, table, data):
         counter = common.TimeCounter('Insert %s in PostgreSQL' % table)
@@ -63,41 +65,34 @@ class PostgreSQL:
         except Exception as e:
             self.db.rollback()
             self.db.close()
-            print("Insert Error: ", e)
+            self.Log.error("Insert Error: " + str(e))
         finally:
             counter.end()
 
-    def readDB(self, schema, table, column, condition = None):
-        counter = common.TimeCounter('Read %s in PostgreSQL' % table)
-        if condition:
-            sql = " SELECT {column} from {schema}.{table} where {condition}" \
-                .format(column=column, schema=schema, table=table, condition=condition)
-        else:
-            sql = " SELECT {column} from {schema}.{table}" \
-                .format(column=column, schema=schema, table=table)
+    def readDB(self, schema, table, column, condition=None):
         try:
+            if condition:
+                sql = " SELECT {column} from {schema}.{table} where {condition}" \
+                    .format(column=column, schema=schema, table=table, condition=condition)
+            else:
+                sql = " SELECT {column} from {schema}.{table}" \
+                    .format(column=column, schema=schema, table=table)
             self.cursor.execute(sql)
             result = self.cursor.fetchall()
+            return result
         except Exception as e:
-            result = (" read DB err", e)
-        finally:
-            counter.end()
-        return result
+            self.Log.error("Read Error: " + str(e))
 
     def updateDB(self,schema,table,column,value,condition):
-        counter = common.TimeCounter('Update %s in PostgreSQL' % table)
-        sql = " UPDATE {schema}.{table} SET {column}='{value}' WHERE {column}='{condition}' "\
-            .format(schema=schema, table=table , column=column ,value=value,condition=condition )
         try :
+            sql = " UPDATE {schema}.{table} SET {column}='{value}' WHERE {column}='{condition}' " \
+                .format(schema=schema, table=table, column=column, value=value, condition=condition)
             self.cursor.execute(sql)
             self.db.commit()
         except Exception as e :
-            print(" update DB err",e)
-        finally:
-            counter.end()
+            self.Log.error("Update Error: " + str(e))
 
     def deleteDB(self, schema, table, condition):
-        counter = common.TimeCounter('Delete %s in PostgreSQL' % table)
         sql = " delete from {schema}.{table} where {condition} ; "\
             .format(schema=schema, table=table, condition=condition)
         try:
@@ -106,9 +101,7 @@ class PostgreSQL:
         except Exception as e:
             self.db.rollback()
             self.db.close()
-            print("delete DB err", e)
-        finally:
-            counter.end()
+            self.Log.error("Delete Error: " + str(e))
 
 # MongoDB SQL DB 클래스 정의
 # 참고: https://popcorn16.tistory.com/122
@@ -121,9 +114,7 @@ class MongoDB:
                                   )
 
     def insert_item_one(self, data, db_name=None, collection_name=None):
-        counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)
         result = self.client[db_name][collection_name].insert_one(data).inserted_id
-        counter.end()
         return result
 
     def insert_item_many(self, datas, db_name=None, collection_name=None):

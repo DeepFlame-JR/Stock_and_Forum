@@ -9,6 +9,8 @@ from urllib import parse
 from ast import literal_eval
 import re, requests
 
+Log = common.Logger(__file__)
+
 # KOSPI 200 가져오기 (date, stock_code, stock_name)
 def get_KOSPI200():
     time_counter = common.TimeCounter('Get KOSPI200 Time')
@@ -107,6 +109,7 @@ def get_KOSDAQ50(date):
 
 if __name__ == '__main__':
     try:
+        Log.info('start to get KOSDAQ data')
         date = datetime.date.today()
         if not check_stock_opening_date(date, '005930'):
             raise Exception('today is not the opening date')
@@ -117,6 +120,8 @@ if __name__ == '__main__':
 
         db = database.PostgreSQL('stockdb')
         db.insertDB(schema='public', table='kosdaq', data=data)
-        kosdaq_list = db.readDB(schema='public', table='kosdaq', column='*', condition="date='%s'" % date)
+        kosdaq_list = db.readDB(schema='public', table='kosdaq', column='name', condition="date='%s'" % date)
+        Log.info('KOSDAQ List: ' + str(kosdaq_list))
+        Log.info('count' + str(len(kosdaq_list)))
     except Exception as e:
-        print(e)
+        Log.error(e)

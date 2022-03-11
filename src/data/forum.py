@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 from seleniumrequests import Chrome
 from webdriver_manager.chrome import ChromeDriverManager
 
+Log = common.Logger(__file__)
 inTime = True
 driver = None
 
@@ -96,8 +97,9 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
 
 if __name__ == '__main__':
     try:
-        date = datetime.date.today()
+        Log.info('start to get forum data')
 
+        date = datetime.date.today()
         # KOSDAQ 불러오기
         postgres = database.PostgreSQL('stockdb')
         kosdaq_list = postgres.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
@@ -107,7 +109,7 @@ if __name__ == '__main__':
 
         # 일자 설정
         today, yesterday = date, date + datetime.timedelta(days=-1)
-        start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
+        start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(18,00,0))
 
         # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
         forum_counter = common.TimeCounter('Get Forum Time')
@@ -128,9 +130,8 @@ if __name__ == '__main__':
                 mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
             inner_counter.end(str(len(forum)) + '개 ')
         forum_counter.end()
-
     except Exception as e:
-        print(e)
+        Log.error(e)
     finally:
         if driver:
             driver.quit()
