@@ -1,4 +1,8 @@
-import sys, os
+import sys, os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+
 src_folder = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(src_folder)
 from util import common
@@ -15,7 +19,6 @@ KST = pendulum.timezone("Asia/Seoul")
 default_args = {
     'owner': 'airflow_user',
     'start_date': days_ago(1),
-    #'start_date': datetime.datetime(2022, 3, 4, tzinfo=KST),
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5),
     'email_on_failure': True,
@@ -25,7 +28,7 @@ default_args = {
 dag = DAG(
     dag_id='get_data',
     default_args=default_args,
-    schedule_interval='20 7 * * *',  # mm hh
+    schedule_interval='0 11 * * *',  # mm hh (매일 20:00에 실행)
     catchup=False,
     )
 

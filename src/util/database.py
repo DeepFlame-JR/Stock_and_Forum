@@ -1,5 +1,9 @@
-import sys, os
+import sys, os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
 sys.path.append((os.path.dirname(__file__)))
+
 import common
 import psycopg2
 from pymongo import MongoClient
@@ -112,15 +116,15 @@ class MongoDB:
         self.client = MongoClient("mongodb://{0}:{1}@{2}:27017/?authSource=admin"
                                   .format(info['user'], info['pw'], info['ip'])
                                   )
+    def __del__(self):
+        self.client.close()
 
     def insert_item_one(self, data, db_name=None, collection_name=None):
         result = self.client[db_name][collection_name].insert_one(data).inserted_id
         return result
 
     def insert_item_many(self, datas, db_name=None, collection_name=None):
-        counter = common.TimeCounter('Insert %s in MongoDB' % collection_name)
         result = self.client[db_name][collection_name].insert_many(datas).inserted_ids
-        counter.end()
         return result
 
     def find_item_one(self, condition=None, db_name=None, collection_name=None):

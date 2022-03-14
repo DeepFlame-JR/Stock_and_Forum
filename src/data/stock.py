@@ -1,39 +1,18 @@
-import sys, os
+import sys, os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 import datetime
-
 from bs4 import BeautifulSoup
 from urllib import parse
 from ast import literal_eval
 import re, requests
 
 Log = common.Logger(__file__)
-
-# KOSPI 200 가져오기 (date, stock_code, stock_name)
-def get_KOSPI200():
-    time_counter = common.TimeCounter('Get KOSPI200 Time')
-    result = []
-
-    BaseURL = 'https://finance.naver.com/sise/entryJongmok.nhn?&page='
-    for i in range(1, 21):
-        url = BaseURL + str(i)
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, 'lxml')
-        items = soup.find_all('td', {'class':'ctg'})
-
-        for item in items:
-            txt = item.a.get('href')
-            k = re.search('\d+', txt) # 문자열 내 정수만 추출
-            if k:
-                code = k.group()
-                name = item.text
-                data = datetime.date.today(), code, name
-                result.append(data)
-
-    time_counter.end()
-    return result
 
 def check_stock_opening_date(date, code):
     params = {

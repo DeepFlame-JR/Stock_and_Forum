@@ -1,4 +1,8 @@
-import time, os
+import os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+
 import configparser as parser
 import logging
 

@@ -1,9 +1,12 @@
-import sys, os
+import sys, os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
-import platform
 
-import datetime, time
+import datetime
 from bs4 import BeautifulSoup
 import requests
 
@@ -103,13 +106,13 @@ if __name__ == '__main__':
         # KOSDAQ 불러오기
         postgres = database.PostgreSQL('stockdb')
         kosdaq_list = postgres.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
-                                  condition="date='%s'" % date)
+                                        condition="date='%s'" % date)
         if len(kosdaq_list) == 0:
             raise Exception('today is not the opening date')
 
         # 일자 설정
         today, yesterday = date, date + datetime.timedelta(days=-1)
-        start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(18,00,0))
+        start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
 
         # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
         forum_counter = common.TimeCounter('Get Forum Time')
@@ -119,7 +122,8 @@ if __name__ == '__main__':
         if 'Windows' not in platform.platform():
             options.add_argument('--headless')
             options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
+            options.add_argument("--single-process")
+            options.add_argument("--disable-dev-shm-usage")
         driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
         for i, stock in enumerate(kosdaq_list):
