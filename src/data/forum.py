@@ -99,6 +99,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
     return forum_list
 
 if __name__ == '__main__':
+    driver = None
     try:
         Log.info('start to get forum data')
 
@@ -138,4 +139,4 @@ if __name__ == '__main__':
         Log.error(e)
     finally:
         if driver:
-            driver.quit()
+            driver.close()
