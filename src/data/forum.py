@@ -134,9 +134,10 @@ if __name__ == '__main__':
             if len(forum) > 0:
                 mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
             inner_counter.end(str(len(forum)) + '개 ')
+
+        if driver:
+            driver.close()
+            Log.info("driver end")
         forum_counter.end()
     except Exception as e:
         Log.error(e)
-    finally:
-        if driver:
-            driver.close()

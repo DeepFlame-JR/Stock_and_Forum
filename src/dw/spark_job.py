@@ -1,13 +1,22 @@
-from pyspark.sql import SparkSession, HiveContext
-import sys, os, io
+import sys, os, io, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
+
+sys.path.append((os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from util import database, common
+
+from pyspark.sql import SparkSession, HiveContext
 
 class SparkJob(object):
     def __init__(self):
-        self.ip = '127.0.0.1'
+        self.config = common.Config()
+        self.ip = self.config.get('POSTGRES')['ip']
+
         self.session = SparkSession.builder \
             .master('local') \
             .appName('KOSDAQ Stock Market') \
@@ -18,7 +27,8 @@ class SparkJob(object):
             .getOrCreate()
 
     def postgresql_query(self, query):
-        port, user, pwd, db = 5432, 'postgres', 'postgres', 'stockdb'
+        info = self.config.get("POSTGRES")
+        port, user, pwd, db = 5432, info['user'], info['pw'], 'stockdb'
 
         df = self.session.read.format('jdbc')\
             .option('url', 'jdbc:postgresql://{0}:{1}/{2}'.format(self.ip,port,db))\
@@ -30,12 +40,13 @@ class SparkJob(object):
         return df
 
     def mongodb_read(self, db, collection):
+        info = self.config.get("MONGO")
+        uri = "mongodb://{0}:{1}@{2}:27017/?authSource=admin".format(info['user'], info['pw'], info['ip'])
         df = self.session.read.format('com.mongodb.spark.sql.DefaultSource') \
+                .option("uri",uri)\
                 .option('database', db)\
                 .option('collection', collection) \
                 .load()
-        # filter = [{eventdtm: '202007080000'}]
-        # df = spark.read.format("mongo").option("pipeline", filter).load()
         return df
 
 class SparkforHive:

@@ -6,6 +6,7 @@ __pycache__/
 # init file
 *.ini
 
+# xml
 *.xml
 
 # node modules
@@ -135,3 +136,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/scala/.idea/
