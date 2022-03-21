@@ -1,7 +1,4 @@
 import sys, os, platform, time
-
-import pyspark.sql.types
-
 if 'Windows' not in platform.platform():
     os.environ['TZ'] = 'Asia/Seoul'
     time.tzset()
@@ -12,9 +9,16 @@ from util import database, common
 from word import word
 
 import pyspark.sql.functions as f
-from pyspark.sql import functions as F
+from pyspark.sql import Row
+from pyspark.sql import SQLContext
 import spark_job
 import datetime
+
+def test(row):
+    row_dict = row.asDict()
+    row_dict['tt'] = row_dict['title'] + "_test"
+    newRow = Row(**row_dict)
+    return newRow
 
 if __name__ == '__main__':
     Log = common.Logger(__file__)
@@ -42,23 +46,35 @@ if __name__ == '__main__':
     Log.info("Stock data count: " + str(stock_df.count()))
     Log.info("Forum data count: " + str(forum_df.count()))
 
+    forum_df.show()
     w = word()
 
     rdd = forum_df.select('title').rdd
-    title_phrases = rdd.map(lambda x: w.get_phrases(x)).collect()
-    print(title_phrases)
+    
+    # test 함수 실험
+    tt = rdd.map(lambda x: test(x))
+    print(type(tt))
+    df = tt.toDF()
+    df.show()
 
-    # agg_df = forum_df.groupby('code', 'date').agg(
-    #             F.count('_id').alias('forum_count'),
-    #             F.sum('view').alias('forum_view'),
-    #             F.sum('like').alias('forum_like'),
-    #             F.sum('unlike').alias('forum_unlike'),
-    #             F.avg(F.length('title')).alias('forum_title_lengthAvg'),
-    #             F.avg(F.length('content')).alias('forum_content_lengthAvg')
-    # )
-    #
-    # result = stock_df.join(agg_df, ['code', 'date'], 'left')
-    # result.show(5)
+    # 같은 함수에 대해서 에러가 나타남 (cannot pickle '_jpype._JField' object)
+    title_phrases1 = rdd.map(lambda row: w.test(row))
+    print(type(title_phrases1))
+    df1 = title_phrases1.toDF()
+    df1.show()
+    # title_phrases = rdd.map(lambda x: w.get_phrases_row(x, 'title')).collect()
+
+    agg_df = forum_df.groupby('code', 'date').agg(
+                f.count('_id').alias('forum_count'),
+                f.sum('view').alias('forum_view'),
+                f.sum('like').alias('forum_like'),
+                f.sum('unlike').alias('forum_unlike'),
+                f.avg(f.length('title')).alias('forum_title_lengthAvg'),
+                f.avg(f.length('content')).alias('forum_content_lengthAvg')
+    )
+
+    result = stock_df.join(agg_df, ['code', 'date'], 'left')
+    result.show(5)
 
     spark_counter.end()
 
