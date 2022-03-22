@@ -4,39 +4,32 @@ if 'Windows' not in platform.platform():
     time.tzset()
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+sys.path.append(os.path.dirname(__file__))
 from util import database, common
 
 from konlpy.tag import Okt
 import pyspark
 from pyspark.sql import Row
 
-class word:
-    def __init__(self):
-        self.okt = Okt()
-        self.Log = common.Logger(__file__)
+okt = Okt()
+Log = common.Logger(__file__)
 
-    def test(self, row):
+def get_phrases(text):
+    text = okt.normalize(text)  # 정규화
+    return okt.phrases(text)
+
+def get_pos(text):
+    text = okt.normalize(text)  # 정규화
+    return okt.pos(text)
+
+def get_phrases_row(row, col_name):
+    if type(row) is Row and col_name:
         row_dict = row.asDict()
-        row_dict['tt'] = row_dict['title'] + "_test"
+        text = row_dict[col_name]
+        result = get_phrases(text)
+        row_dict[col_name + '_phrases'] = result
         newRow = Row(**row_dict)
         return newRow
-
-    def get_phrases_row(self, row, col_name):
-        if type(row) is Row and col_name:
-            row_dict = row.asDict()
-            text = row_dict[col_name]
-            result = self.get_phrases(text)
-            row_dict[col_name+'_phrases'] = len(result)
-            newRow = Row(**row_dict)
-            return newRow
-
-    def get_phrases(self, text):
-        text = self.okt.normalize(text) # 정규화
-        return self.okt.phrases(text)
-
-    def get_pos(self, text):
-        text = self.okt.normalize(text) # 정규화
-        return self.okt.pos(text)
 
 # d = {'title':'나랏말이 중국과 달라 한자와 서로 통하지 아니하므로'}
 # r = pyspark.sql.Row(**d)
