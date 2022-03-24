@@ -1,5 +1,14 @@
+import sys, os, platform, time
+if 'Windows' not in platform.platform():
+    os.environ['TZ'] = 'Asia/Seoul'
+    time.tzset()
+sys.path.append((os.path.dirname(__file__)))
+
+sys.path.append((os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from util import database, common
+
 from pyhive import hive
-import mock
 import sasl
 import thrift.transport.TSocket
 import thrift.transport.TTransport
@@ -8,23 +17,24 @@ from thrift.transport.TTransport import TTransportException
 
 class HiveJob(object):
     def __init__(self):
-        socket = thrift.transport.TSocket.TSocket('localhost', 9083)
-        sasl_auth = 'PLAIN'
-        sasl_client = sasl.Client()
-        sasl_client.setAttr('host', 'localhost')
-        sasl_client.setAttr('username', 'hive')
-        sasl_client.setAttr('password', 'hive')
-        sasl_client.init()
+        config = common.Config()
+        info = config.get("HIVE")
 
-        transport = thrift_sasl.TSaslClientTransport(sasl_client, sasl_auth, socket)
-        self.connection = hive.Connection(thrift_transport=transport)
+        self.connection = hive.Connection(
+            host=info['ip'], port=10000, username=info['user'], password=info['pw'],
+            auth='CUSTOM'
+            )
         self.cursor = self.connection.cursor()
 
     def __del__(self):
-        self.connection.close()
-        self.cursor.close()
+        if self.connection:
+            self.connection.close()
+        if self.cursor:
+            self.cursor.close()
 
     def execute(self, query, args = {}):
         self.cursor.execute(query, args)
         row = self.cursor.fetchall()
         return row
+
+h = HiveJob()
