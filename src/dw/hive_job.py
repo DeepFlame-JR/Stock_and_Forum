@@ -20,6 +20,7 @@ class HiveJob(object):
         config = common.Config()
         info = config.get("HIVE")
 
+        self.Log = common.Logger(__file__)
         self.connection = hive.Connection(
             host=info['ip'], port=10000, username=info['user'], password=info['pw'],
             auth='CUSTOM'
@@ -27,14 +28,27 @@ class HiveJob(object):
         self.cursor = self.connection.cursor()
 
     def __del__(self):
-        if self.connection:
-            self.connection.close()
         if self.cursor:
             self.cursor.close()
+        if self.connection:
+            self.connection.close()
 
     def execute(self, query, args = {}):
         self.cursor.execute(query, args)
-        row = self.cursor.fetchall()
-        return row
+        try:
+            self.cursor.fetchall()
+        except Exception as e:
+            self.Log.error(e)
 
 h = HiveJob()
+
+# Create Test
+table_body  = '(`Id` BIGINT, `some_field_1` STRING, `some_field_2` STRING ) '
+table_format = ("PARQUET", "TEXTFILE", "AVRO",)
+create_tb = ('CREATE TABLE IF NOT EXISTS `%s`.`%s` %s STORED AS %s') % ('stock_db', 'my_table6', table_body, table_format[0])
+h.execute(create_tb)
+
+# Read Test
+import pandas as pd
+df = pd.read_sql("select * from stock_db.my_table2", h.connection)
+print(df)
