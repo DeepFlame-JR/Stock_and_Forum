@@ -98,7 +98,9 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         forum_list.extend(result)
     return forum_list
 
-if __name__ == '__main__':
+def main_get_forum(start, end):
+    global inTime, driver
+
     driver = None
     try:
         Log.info('start to get forum data')
@@ -128,12 +130,13 @@ if __name__ == '__main__':
         driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
         for i, stock in enumerate(kosdaq_list):
-            date, code, name, forum_url = stock
-            inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
-            forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
-            if len(forum) > 0:
-                mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
-            inner_counter.end(str(len(forum)) + '개 ')
+            if start <= i < end:
+                date, code, name, forum_url = stock
+                inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
+                forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
+                if len(forum) > 0:
+                    mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
+                inner_counter.end(str(len(forum)) + '개 ')
 
         if driver:
             driver.close()

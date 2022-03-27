@@ -6,14 +6,13 @@ if 'Windows' not in platform.platform():
 src_folder = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(src_folder)
 from util import common
+from data import forum
 
 import datetime, pendulum
 from airflow import DAG
 from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
-
-config = common.Config()
-info = config.get("EMAIL")
 
 KST = pendulum.timezone("Asia/Seoul")
 default_args = {
@@ -21,8 +20,6 @@ default_args = {
     'start_date': days_ago(1),
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5),
-    'email_on_failure': True,
-    'email': [info['email']],
     }
 
 dag = DAG(
@@ -32,11 +29,24 @@ dag = DAG(
     catchup=False,
     )
 
+# DAG 작성
+def execute_forum(start, end, **kwargs):
+    forum.main_get_forum(start, end)
+    return "Executor End"
+
 stock = BashOperator(task_id='get_stock',
                      bash_command='python3 %s/data/stock.py' % src_folder,
                      dag=dag)
-forum = BashOperator(task_id='get_forum',
-                     bash_command='python3 %s/data/forum.py' % src_folder,
-                     dag=dag)
 
-stock >> forum
+forum_tasks = {}
+for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
+    task = PythonOperator(
+        task_id=f"forum_{i+1}",
+        python_callable=execute_forum,
+        op_kwargs={"start":i*10, "end":(i+1)*10},
+        dag=dag,
+    )
+    forum_tasks[f] = task
+
+stock >> [forum_tasks[t] for t in ["f1", "f2", "f3", "f4", "f5"]]
+# stock >> forum_tasks["f1"] >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"] >> forum_tasks["f5"]
