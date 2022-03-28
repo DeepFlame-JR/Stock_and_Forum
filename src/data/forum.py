@@ -102,6 +102,7 @@ def main_get_forum(start, end):
     global inTime, driver
 
     driver = None
+    forum_counter = common.TimeCounter('Get Forum Time')
     try:
         Log.info('start to get forum data')
 
@@ -118,9 +119,6 @@ def main_get_forum(start, end):
         start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
 
         # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
-        forum_counter = common.TimeCounter('Get Forum Time')
-        mongo = database.MongoDB()
-
         options = webdriver.ChromeOptions()
         if 'Windows' not in platform.platform():
             options.add_argument('--headless')
@@ -129,18 +127,28 @@ def main_get_forum(start, end):
             options.add_argument("--disable-dev-shm-usage")
         driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
+        mongo = database.MongoDB()
         for i, stock in enumerate(kosdaq_list):
             if start <= i < end:
                 date, code, name, forum_url = stock
                 inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
+
+                # retires 대비
+                condition = {'datetime':{'$gte':start_datetime, '$lte':end_datetime}}
+                check_data = mongo.find_item(condition=condition, db_name='forumdb', collection_name='naverforum')
+                if len(list(check_data)) != 0:
+                    inner_counter.end('data is already inserted')
+                    continue
+
                 forum = get_forum(code, name, forum_url, start_datetime, end_datetime)
                 if len(forum) > 0:
                     mongo.insert_item_many(datas=forum, db_name='forumdb', collection_name='naverforum')
                 inner_counter.end(str(len(forum)) + '개 ')
 
+    except Exception as e:
+        Log.error(e)
+    finally:
         if driver:
             driver.close()
             Log.info("driver end")
         forum_counter.end()
-    except Exception as e:
-        Log.error(e)

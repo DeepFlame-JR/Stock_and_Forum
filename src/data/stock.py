@@ -93,11 +93,15 @@ if __name__ == '__main__':
         if not check_stock_opening_date(date, '005930'):
             raise Exception('today is not the opening date')
 
+        db = database.PostgreSQL('stockdb')
+        kosdaq_list = db.readDB(schema='public', table='kosdaq', column='name', condition="date='%s'" % date)
+        if len(kosdaq_list) != 0:
+            raise Exception('data is already inserted')
+
         data = get_KOSDAQ50(date)
         if data == None:
             raise Exception('data is None')
 
-        db = database.PostgreSQL('stockdb')
         db.insertDB(schema='public', table='kosdaq', data=data)
         kosdaq_list = db.readDB(schema='public', table='kosdaq', column='name', condition="date='%s'" % date)
         Log.info('KOSDAQ List: ' + str(kosdaq_list))
