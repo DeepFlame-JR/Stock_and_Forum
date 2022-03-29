@@ -134,9 +134,10 @@ def main_get_forum(start, end):
                 inner_counter = common.TimeCounter(name + '(' + str(i+1) + '/' + str(len(kosdaq_list)) + ')')
 
                 # retires 대비
-                condition = {'datetime':{'$gte':start_datetime, '$lte':end_datetime}}
+                condition = {'name':name, 'datetime':{'$gte':start_datetime, '$lte':end_datetime}}
                 check_data = mongo.find_item(condition=condition, db_name='forumdb', collection_name='naverforum')
-                if len(list(check_data)) != 0:
+                data_length = len(list(check_data))
+                if data_length != 0:
                     inner_counter.end('data is already inserted')
                     continue
 
@@ -152,3 +153,5 @@ def main_get_forum(start, end):
             driver.close()
             Log.info("driver end")
         forum_counter.end()
+
+main_get_forum(0, 50)
