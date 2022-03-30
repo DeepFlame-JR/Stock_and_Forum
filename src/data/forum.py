@@ -81,7 +81,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         reply_list = list(filter(None, reply_list))
 
         row_dict = {'name' : name, 'code': code, 'datetime':date_time,
-                    'title': title, 'content':content, 'id':item_infos[-4],
+                    'title': item_infos[1], 'content':content, 'id':item_infos[-4],
                     'view':int(item_infos[-3]), 'like':int(item_infos[-2]), 'unlike':int(item_infos[-1]),
                     'reply':reply_list, 'reply_count':len(reply_list)}
         return row_dict
@@ -92,7 +92,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
     while inTime:
         page += 1
         r = requests.get(forum_url + '&page=%d' % page, headers={'User-Agent': 'Mozilla/5.0'})
-        soup = BeautifulSoup(r.content, 'html.parser')
+        soup = BeautifulSoup(r.text, 'html.parser')
         table = soup.select_one('#content > div.section.inner_sub > table.type2 > tbody')
         items = table.find_all('tr', onmouseover="mouseOver(this)")
         result = list(map(lambda x: get_forum_row(x), items))
@@ -160,3 +160,5 @@ def main_get_forum(start, end):
             driver.quit()
             Log.info("driver end")
         forum_counter.end()
+
+main_get_forum(0,50)

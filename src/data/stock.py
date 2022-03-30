@@ -70,7 +70,6 @@ def get_KOSDAQ50(date):
         trend_infos = trend_item.get_text().split("\n")
         trend_infos = list(map(lambda x: x.replace('\t', '').replace('%', '').replace(',', ''), trend_infos))
         trend_infos = list(filter(None, trend_infos))
-
         return date, code, item_infos[1], int(item_infos[6]), \
                stock_infos[4], stock_infos[1], stock_infos[2], stock_infos[3], \
                int(item_infos[3]), float(item_infos[4]), stock_infos[5], \
@@ -79,7 +78,7 @@ def get_KOSDAQ50(date):
     time_counter = common.TimeCounter('Get KOSDAQ50')
     url = 'https://finance.naver.com/sise/sise_market_sum.naver?sosok=1&page=1'
     r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-    soup = BeautifulSoup(r.content, 'html.parser')
+    soup = BeautifulSoup(r.text, 'html.parser')
     table = soup.find('tbody')
     items = table.find_all('tr', onmouseover="mouseOver(this)")
     result = list(map(lambda x: get_KOSDAQ(x), items))
