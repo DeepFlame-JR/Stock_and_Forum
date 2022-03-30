@@ -15,6 +15,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from seleniumrequests import Chrome
 from webdriver_manager.chrome import ChromeDriverManager
+from airflow.exceptions import AirflowException
 
 Log = common.Logger(__file__)
 inTime = True
@@ -72,6 +73,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
         content = soup.select_one('#body').getText()
+        title = soup.select_one('#content > div.section.inner_sub > table.view > tbody > tr:nth-child(1) > th:nth-child(1) > strong').getText()
 
         response = soup.find('div', {'class': 'u_cbox_content_wrap'})
         items = response.find_all('li')
@@ -79,7 +81,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         reply_list = list(filter(None, reply_list))
 
         row_dict = {'name' : name, 'code': code, 'datetime':date_time,
-                    'title': item_infos[1], 'content':content, 'id':item_infos[-4],
+                    'title': title, 'content':content, 'id':item_infos[-4],
                     'view':int(item_infos[-3]), 'like':int(item_infos[-2]), 'unlike':int(item_infos[-1]),
                     'reply':reply_list, 'reply_count':len(reply_list)}
         return row_dict
@@ -121,11 +123,15 @@ def main_get_forum(start, end):
         # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
         options = webdriver.ChromeOptions()
         if 'Windows' not in platform.platform():
+            config = common.Config()
+            info = config.get("MONGO")
             options.add_argument('--headless')
             options.add_argument('--no-sandbox')
             options.add_argument("--single-process")
             options.add_argument("--disable-dev-shm-usage")
-        driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
+            driver = webdriver.Remote('http://%s:4444'%info['ip'], options=options)
+        else:
+            driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
         mongo = database.MongoDB()
         for i, stock in enumerate(kosdaq_list):
@@ -148,10 +154,9 @@ def main_get_forum(start, end):
 
     except Exception as e:
         Log.error(e)
+        raise AirflowException(e)
     finally:
         if driver:
-            driver.close()
+            driver.quit()
             Log.info("driver end")
         forum_counter.end()
-
-main_get_forum(0, 50)
