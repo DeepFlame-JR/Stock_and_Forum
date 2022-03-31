@@ -15,7 +15,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from seleniumrequests import Chrome
 from webdriver_manager.chrome import ChromeDriverManager
-from airflow.exceptions import AirflowException
 
 Log = common.Logger(__file__)
 inTime = True
@@ -23,7 +22,7 @@ driver = None
 
 # datetime, date, title, id, view, like, dislike + reply(like, dislike, response)
 def get_forum(code, name, forum_url, start_datetime, end_datetime):
-    global inTime, driver
+    global Log, inTime, driver
 
     def get_reply(item):
         result = dict()
@@ -50,7 +49,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         return result
 
     def get_forum_row(item):
-        global inTime, driver
+        global Log, inTime, driver
 
         item_infos = item.get_text().split("\n")
         item_infos = list(map(lambda x: x.replace('\t', '').replace(',', ''), item_infos))
@@ -101,7 +100,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
     return forum_list
 
 def main_get_forum(start, end):
-    global inTime, driver
+    global Log, inTime, driver
 
     driver = None
     forum_counter = common.TimeCounter('Get Forum Time')
@@ -109,6 +108,7 @@ def main_get_forum(start, end):
         Log.info('start to get forum data')
 
         date = datetime.date.today()
+        # date = datetime.date(2022,3,29)
         # KOSDAQ 불러오기
         postgres = database.PostgreSQL('stockdb')
         kosdaq_list = postgres.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
@@ -154,11 +154,8 @@ def main_get_forum(start, end):
 
     except Exception as e:
         Log.error(e)
-        raise AirflowException(e)
     finally:
         if driver:
             driver.quit()
             Log.info("driver end")
         forum_counter.end()
-
-main_get_forum(0,50)

@@ -43,10 +43,11 @@ for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     task = PythonOperator(
         task_id=f"forum_{i+1}",
         python_callable=execute_forum,
-        op_kwargs={"start":i*10, "end":(i+1)*10},
+        op_kwargs={"start":i*12, "end":min(50,(i+1)*12)},
         dag=dag,
     )
     forum_tasks[f] = task
 
-stock >> [forum_tasks[t] for t in ["f1", "f2", "f3", "f4", "f5"]]
-# stock >> forum_tasks["f1"] >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"] >> forum_tasks["f5"]
+# stock >> [forum_tasks[t] for t in ["f1", "f2", "f3", "f4", "f5"]]
+stock >> forum_tasks["f1"] >> forum_tasks["f4"] >> forum_tasks["f5"]
+stock >> forum_tasks["f2"] >> forum_tasks["f3"]
