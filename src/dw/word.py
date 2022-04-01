@@ -1,3 +1,4 @@
+import datetime
 import sys, os, platform, time
 if 'Windows' not in platform.platform():
     os.environ['TZ'] = 'Asia/Seoul'
@@ -28,7 +29,7 @@ def get_phrases_row(row, col_name):
         text = row_dict[col_name]
         result = get_phrases(text)
         row_dict[col_name + '_phrases'] = result
-        newRow = Row(**row_dict)
+        newRow = Row(**row_dict[col_name + '_phrases'])
         return newRow
 
 # d = {'title':'나랏말이 중국과 달라 한자와 서로 통하지 아니하므로'}

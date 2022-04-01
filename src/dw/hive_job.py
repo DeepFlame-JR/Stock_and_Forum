@@ -9,11 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 from pyhive import hive
-import sasl
-import thrift.transport.TSocket
-import thrift.transport.TTransport
-import thrift_sasl
-from thrift.transport.TTransport import TTransportException
+import pandas as pd
 
 class HiveJob(object):
     def __init__(self):
@@ -40,15 +36,39 @@ class HiveJob(object):
         except Exception as e:
             self.Log.error(e)
 
-h = HiveJob()
+def CreateTable(db, name):
+    h = HiveJob()
+    table_body = '(`code` string, ' \
+                 '`date` Date, ' \
+                 '`name` string, ' \
+                 '`market_cap` int, ' \
+                 '`price` int,' \
+                 '`open_price` int,' \
+                 '`high_price` int,' \
+                 '`low_price` int,' \
+                 '`gap` int,' \
+                 '`gap_ratio` float,' \
+                 '`trading_volume` int,' \
+                 '`institutional_volume` int,' \
+                 '`foreign_volume` int,' \
+                 '`foreign_ratio` float,' \
+                 '`forum_url` string,' \
+                 '`forum_count` int,' \
+                 '`forum_view` int,' \
+                 '`forum_like` int,' \
+                 '`forum_unlike`int,' \
+                 '`forum_title_length_avg` float,' \
+                 '`forum_content_length_avg` float,' \
+                 '`forum_reply_count` int)'
+    table_format = ("PARQUET", "TEXTFILE", "AVRO",)
+    schema = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, table_body, table_format[0])
+    print(schema)
+    h.execute(schema)
 
-# Create Test
-table_body  = '(`Id` BIGINT, `some_field_1` STRING, `some_field_2` STRING ) '
-table_format = ("PARQUET", "TEXTFILE", "AVRO",)
-create_tb = ('CREATE TABLE IF NOT EXISTS `%s`.`%s` %s STORED AS %s') % ('stock_db', 'my_table6', table_body, table_format[0])
-h.execute(create_tb)
+    df = pd.read_sql("select * from %s.%s"%(db, name), h.connection)
+    print(df)
 
-# Read Test
-import pandas as pd
-df = pd.read_sql("select * from stock_db.my_table2", h.connection)
-print(df)
+CreateTable('stockdb', 'kosdaq')
+
+
+

@@ -40,22 +40,24 @@ if __name__ == '__main__':
     Log.info("Forum data count: " + str(forum_df.count()))
 
     # 형태소 분해 (Okt)
-    forum_RDD = forum_df.rdd.map(lambda row: word.get_phrases_row(row, 'title'))
+    # forum_RDD = forum_df.rdd.map(lambda row: word.get_phrases_row(row, 'title'))
+    # print(type(forum_RDD))
+    # print(forum_RDD.collect())
 
     agg_df = forum_df.groupby('code', 'date').agg(
                 f.count('_id').alias('forum_count'),
                 f.sum('view').alias('forum_view'),
                 f.sum('like').alias('forum_like'),
                 f.sum('unlike').alias('forum_unlike'),
-                f.avg(f.length('title')).alias('forum_title_lengthAvg'),
-                f.avg(f.length('content')).alias('forum_content_lengthAvg')
+                f.avg(f.length('title')).alias('forum_title_length_avg'),
+                f.avg(f.length('content')).alias('forum_content_length_avg'),
+                f.sum('reply_count').alias('forum_reply_count')
     )
 
     result = stock_df.join(agg_df, ['code', 'date'], 'left')
-    result.show(5)
+
+    # result.printSchema()
+    # DF = result.todf()
+    # print(type(DF))
 
     spark_counter.end()
-
-
-
-
