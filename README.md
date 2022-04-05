@@ -29,6 +29,6 @@ Ubuntu:20.04
 - Hadoop
 - Apache Spark
 - Apache Hive
-- Apache Airflow
+- Apache Airflow (with Docker)
 - PostgreSQL
 - MongoDB
