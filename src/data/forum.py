@@ -122,6 +122,7 @@ def main_get_forum(start, end):
 
         # 불러온 KOSDAQ 종목의 종목토론방 데이터 크롤링
         options = webdriver.ChromeOptions()
+        Log.info('Open browser')
         if 'Windows' not in platform.platform():
             config = common.Config()
             info = config.get("MONGO")
@@ -133,6 +134,7 @@ def main_get_forum(start, end):
         else:
             driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
+        Log.info('Open Mongo DB')
         mongo = database.MongoDB()
         for i, stock in enumerate(kosdaq_list):
             if start <= i < end:
