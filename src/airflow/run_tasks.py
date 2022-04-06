@@ -5,18 +5,15 @@ if 'Windows' not in platform.platform():
 
 src_folder = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(src_folder)
-from util import common
-from data import forum
 
-import datetime, pendulum
+import datetime
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
-KST = pendulum.timezone("Asia/Seoul")
 default_args = {
-    'owner': 'airflow_user',
+    'owner': 'airflow',
     'start_date': days_ago(1),
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5),
@@ -31,6 +28,7 @@ dag = DAG(
 
 # DAG 작성
 def execute_forum(start, end, **kwargs):
+    from data import forum
     forum.main_get_forum(start, end)
     return "Executor End"
 
