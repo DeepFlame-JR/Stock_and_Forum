@@ -38,7 +38,7 @@ class HiveJob(object):
 
 def CreateTable(db, name):
     h = HiveJob()
-    table_body = '(`code` string, ' \
+    schema = '(`code` string, ' \
                  '`date` Date, ' \
                  '`name` string, ' \
                  '`market_cap` int, ' \
@@ -61,9 +61,9 @@ def CreateTable(db, name):
                  '`forum_content_length_avg` float,' \
                  '`forum_reply_count` int)'
     table_format = ("PARQUET", "TEXTFILE", "AVRO",)
-    schema = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, table_body, table_format[0])
-    print(schema)
-    h.execute(schema)
+    query = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, schema, table_format[0])
+    print(query)
+    h.execute(query)
 
     df = pd.read_sql("select * from %s.%s"%(db, name), h.connection)
     print(df)
