@@ -15,7 +15,7 @@ from airflow.utils.dates import days_ago
 default_args = {
     'owner': 'airflow',
     'start_date': days_ago(1),
-    'retries': 1,
+    'retries': 2,
     'retry_delay': datetime.timedelta(minutes=5),
     }
 
