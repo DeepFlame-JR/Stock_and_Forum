@@ -60,8 +60,8 @@ def CreateTable(db, name):
                  '`forum_title_length_avg` float,' \
                  '`forum_content_length_avg` float,' \
                  '`forum_reply_count` int)'
-    table_format = ("PARQUET", "TEXTFILE", "AVRO",)
-    query = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, schema, table_format[0])
+    # table_format = ("PARQUET", "TEXTFILE", "AVRO",)
+    query = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, schema) #, table_format[0])
     print(query)
     h.execute(query)
 
