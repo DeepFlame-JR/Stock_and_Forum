@@ -36,7 +36,7 @@ class HiveJob(object):
         except Exception as e:
             self.Log.error(e)
 
-def CreateTable(db, name):
+def CreateTable(db, table):
     h = HiveJob()
     schema = '(`code` string, ' \
                  '`date` Date, ' \
@@ -61,14 +61,19 @@ def CreateTable(db, name):
                  '`forum_content_length_avg` float,' \
                  '`forum_reply_count` int)'
     # table_format = ("PARQUET", "TEXTFILE", "AVRO",)
-    query = ('CREATE TABLE IF NOT EXISTS %s.%s %s STORED AS %s') % (db, name, schema) #, table_format[0])
+    query = ('''CREATE TABLE IF NOT EXISTS %s.%s %s
+    PARTITIONED BY (year int, month int, day int)
+    STORED AS PARQUET
+    ''') % (db, table, schema)
+
     print(query)
+    df = pd.read_sql("select * from %s.%s" % (db, table), h.connection)
     h.execute(query)
 
-    df = pd.read_sql("select * from %s.%s"%(db, name), h.connection)
+    df = pd.read_sql("select * from %s.%s" % (db, table), h.connection)
     print(df)
 
-CreateTable('stockdb', 'kosdaq')
+
 
 
 

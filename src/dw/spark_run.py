@@ -6,13 +6,15 @@ if 'Windows' not in platform.platform():
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(__file__))
 from util import database, common
+from hive_job import HiveJob
+import spark_job
 import word
 
 import pyspark.sql.functions as f
 from pyspark.sql import Row
 from pyspark.sql.types import *
-import spark_job
 import datetime
+import pandas as pd
 
 if __name__ == '__main__':
     Log = common.Logger(__file__)
@@ -59,5 +61,9 @@ if __name__ == '__main__':
     # result.printSchema()
     # DF = result.todf()
     # print(type(DF))
+
+    # h = HiveJob()
+    # df = pd.read_sql("select * from %s.%s" % ('stockdb', 'kosdaq'), h.connection)
+    # print(df)
 
     spark_counter.end()
