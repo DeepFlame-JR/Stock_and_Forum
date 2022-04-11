@@ -108,7 +108,7 @@ def main_get_forum(start, end):
         Log.info('start to get forum data')
 
         date = datetime.date.today()
-        # date = datetime.date(2022,3,29)
+        # date = datetime.date(2022,4,7)
         # KOSDAQ 불러오기
         postgres = database.PostgreSQL('stockdb')
         kosdaq_list = postgres.readDB(schema='public', table='kosdaq', column='date, code, name, forum_url',
@@ -130,7 +130,7 @@ def main_get_forum(start, end):
             options.add_argument('--no-sandbox')
             options.add_argument("--single-process")
             options.add_argument("--disable-dev-shm-usage")
-            driver = webdriver.Remote('http://%s:4444'%info['ip'], options=options)
+            driver = webdriver.Remote('http://%s:4567'%info['ip'], options=options)
         else:
             driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 

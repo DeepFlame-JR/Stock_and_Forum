@@ -8,6 +8,7 @@ sys.path.append((os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
+from sqlalchemy import create_engine
 from pyhive import hive
 import pandas as pd
 
@@ -35,6 +36,15 @@ class HiveJob(object):
             self.cursor.fetchall()
         except Exception as e:
             self.Log.error(e)
+
+def Hive_Insert(df, schema):
+    config = common.Config()
+    info = config.get("HIVE")
+
+    engine = create_engine('hive://%s:10000/%s' % (info['ip'], schema))
+    df.to_sql(schema='stockdb', name='kosdaq',
+              con=engine, index=False, method='multi', if_exists='append')
+
 
 def CreateTable(db, table):
     h = HiveJob()
@@ -67,13 +77,12 @@ def CreateTable(db, table):
     ''') % (db, table, schema)
 
     print(query)
-    df = pd.read_sql("select * from %s.%s" % (db, table), h.connection)
     h.execute(query)
 
     df = pd.read_sql("select * from %s.%s" % (db, table), h.connection)
     print(df)
 
-
+# CreateTable('stockdb', 'kosdaq')
 
 
 

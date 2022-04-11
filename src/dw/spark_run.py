@@ -6,13 +6,14 @@ if 'Windows' not in platform.platform():
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(__file__))
 from util import database, common
-from hive_job import HiveJob
+from hive_job import Hive_Insert
 import spark_job
 import word
 
 import pyspark.sql.functions as f
 from pyspark.sql import Row
 from pyspark.sql.types import *
+from pyspark.sql import SQLContext
 import datetime
 import pandas as pd
 
@@ -56,13 +57,17 @@ if __name__ == '__main__':
                 f.sum('reply_count').alias('forum_reply_count')
     )
 
-    result = stock_df.join(agg_df, ['code', 'date'], 'left')
+    spark_df = stock_df.join(agg_df, ['code', 'date'], 'left')
+    spark_df.show(5)
 
-    # result.printSchema()
-    # DF = result.todf()
-    # print(type(DF))
+    # Hive 삽입
+    today_kosdaq_df = spark_df.toPandas()
+    today_kosdaq_df['year'] = date.year
+    today_kosdaq_df['month'] = date.month
+    today_kosdaq_df['day'] = date.day
+    Hive_Insert(today_kosdaq_df, 'stockdb')
 
-    # h = HiveJob()
+    # h.execute('insert into stockdb.kosdaq select * from today_kosdaq_df')
     # df = pd.read_sql("select * from %s.%s" % ('stockdb', 'kosdaq'), h.connection)
     # print(df)
 
