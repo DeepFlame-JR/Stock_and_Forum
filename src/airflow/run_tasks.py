@@ -27,9 +27,9 @@ dag = DAG(
     )
 
 # DAG 작성
-def execute_forum(start, end, **kwargs):
+def execute_forum(start, end, port, **kwargs):
     from data import forum
-    forum.main_get_forum(start, end)
+    forum.main_get_forum(start, end, port)
     return "Executor End"
 
 stock = BashOperator(task_id='get_stock',
@@ -41,7 +41,7 @@ for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     task = PythonOperator(
         task_id=f"forum_{i+1}",
         python_callable=execute_forum,
-        op_kwargs={"start":i*11, "end":min(50,(i+1)*11)},
+        op_kwargs={"start":i*11, "end":min(50,(i+1)*11), "port":4444+i},
         dag=dag,
     )
     forum_tasks[f] = task

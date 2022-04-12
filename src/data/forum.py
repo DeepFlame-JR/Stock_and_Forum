@@ -99,7 +99,7 @@ def get_forum(code, name, forum_url, start_datetime, end_datetime):
         forum_list.extend(result)
     return forum_list
 
-def main_get_forum(start, end):
+def main_get_forum(start, end, port):
     global Log, inTime, driver
 
     driver = None
@@ -130,7 +130,7 @@ def main_get_forum(start, end):
             options.add_argument('--no-sandbox')
             options.add_argument("--single-process")
             options.add_argument("--disable-dev-shm-usage")
-            driver = webdriver.Remote('http://%s:4567'%info['ip'], options=options)
+            driver = webdriver.Remote('http://%s:%s'%(info['ip'], port), options=options)
         else:
             driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
 
