@@ -65,6 +65,7 @@ if __name__ == '__main__':
     today_kosdaq_df['year'] = date.year
     today_kosdaq_df['month'] = date.month
     today_kosdaq_df['day'] = date.day
+    Log.info("Hive Insert")
     Hive_Insert(today_kosdaq_df, 'stockdb')
 
     # h.execute('insert into stockdb.kosdaq select * from today_kosdaq_df')

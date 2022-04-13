@@ -47,5 +47,5 @@ for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     forum_tasks[f] = task
 
 # stock >> [forum_tasks[t] for t in ["f1", "f2", "f3", "f4", "f5"]]
-stock >> forum_tasks["f1"] >> forum_tasks["f4"]
-stock >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f5"]
+stock >> forum_tasks["f1"] >> forum_tasks["f5"]
+stock >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"]
