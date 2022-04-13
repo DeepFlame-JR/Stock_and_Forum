@@ -10,7 +10,7 @@ sys.path.append((os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
-from pyspark.sql import SparkSession, HiveContext
+from pyspark.sql import SparkSession
 
 class SparkJob(object):
     def __init__(self):
@@ -48,16 +48,3 @@ class SparkJob(object):
                 .option('collection', collection) \
                 .load()
         return df
-
-class SparkforHive:
-    def __init__(self):
-        self.session = SparkSession.builder\
-            .appName('Spark for Hive')\
-            .config('hive.metastore.uris', "thrift://localhost:9083")\
-            .enableHiveSupport()\
-            .getOrCreate()
-
-
-
-
-

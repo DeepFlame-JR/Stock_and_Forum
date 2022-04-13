@@ -8,7 +8,6 @@ sys.path.append(os.path.dirname(__file__))
 from util import database, common
 from hive_job import Hive_Insert
 import spark_job
-import word
 
 import pyspark.sql.functions as f
 from pyspark.sql import Row
@@ -67,9 +66,5 @@ if __name__ == '__main__':
     today_kosdaq_df['day'] = date.day
     Log.info("Hive Insert")
     Hive_Insert(today_kosdaq_df, 'stockdb')
-
-    # h.execute('insert into stockdb.kosdaq select * from today_kosdaq_df')
-    # df = pd.read_sql("select * from %s.%s" % ('stockdb', 'kosdaq'), h.connection)
-    # print(df)
 
     spark_counter.end()

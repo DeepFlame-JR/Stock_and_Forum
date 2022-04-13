@@ -36,6 +36,10 @@ stock = BashOperator(task_id='get_stock',
                      bash_command='python3 %s/data/stock.py' % src_folder,
                      dag=dag)
 
+etl = BashOperator(task_id='etl_data',
+                   bash_command='python3 %s/dw/spark_run.py' % src_folder,
+                   dag=dag)
+
 forum_tasks = {}
 for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     task = PythonOperator(
@@ -47,5 +51,5 @@ for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     forum_tasks[f] = task
 
 # stock >> [forum_tasks[t] for t in ["f1", "f2", "f3", "f4", "f5"]]
-stock >> forum_tasks["f1"] >> forum_tasks["f5"]
-stock >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"]
+stock >> forum_tasks["f1"] >> forum_tasks["f5"] >> etl
+stock >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"] >> etl
