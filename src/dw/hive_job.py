@@ -42,7 +42,7 @@ def Hive_Insert(df, schema):
     info = config.get("HIVE")
 
     engine = create_engine('hive://%s:10000/%s' % (info['ip'], schema))
-    df.to_sql(schema='stockdb', name='kosdaq',
+    df.to_sql(schema=schema, name='kosdaq',
               con=engine, index=False, method='multi', if_exists='append')
 
 
