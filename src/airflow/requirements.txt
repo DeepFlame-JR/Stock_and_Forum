@@ -1,0 +1,13 @@
+pandas==1.3.5
+selenium
+selenium-requests
+bs4
+webdriver-manager
+pymongo
+psycopg2
+pyspark
+pyhive
+thrift
+thrift-sasl
+sasl
+konlpy

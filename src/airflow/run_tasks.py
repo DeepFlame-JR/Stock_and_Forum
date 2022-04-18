@@ -36,7 +36,7 @@ stock = BashOperator(task_id='get_stock',
                      bash_command='python3 %s/data/stock.py' % src_folder,
                      dag=dag)
 
-etl = BashOperator(task_id='etl_data',
+etl = BashOperator(task_id='ETL',
                    bash_command='python3 %s/dw/spark_run.py' % src_folder,
                    dag=dag)
 
