@@ -6,8 +6,8 @@ if 'Windows' not in platform.platform():
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 sys.path.append(os.path.dirname(__file__))
 from util import database, common
-from hive_job import Hive_Insert
-import spark_job
+from hive_job import HiveJob
+from spark_job import SparkJob
 
 import pyspark.sql.functions as f
 from pyspark.sql import Row
@@ -19,52 +19,54 @@ import pandas as pd
 if __name__ == '__main__':
     Log = common.Logger(__file__)
     spark_counter = common.TimeCounter('Spark Operation')
+    try:
+        date = datetime.date.today()
+        # date = datetime.date(2022,4,18)
+        s = SparkJob()
+        h = HiveJob()
 
-    s = spark_job.SparkJob()
+        # retires 대비
+        today_df = h.Read("select * from stockdb.kosdaq where created='%s'" % date)
+        if len(today_df) != 0:
+            raise 'data is already inserted'
 
-    # 일자 설정
-    date = datetime.date.today()
-    # date = datetime.date(2022,3,22)
-    today, yesterday = date, date + datetime.timedelta(days=-1)
-    start_datetime, end_datetime = datetime.datetime.combine(today, datetime.time(8,0,0)), datetime.datetime.combine(today, datetime.time(15,30,0))
-    start_datetime, end_datetime = start_datetime + datetime.timedelta(hours=9), end_datetime + datetime.timedelta(hours=9) # Mongo DB가 UTC로 설정
+        # get data
+        stock_df = s.postgresql_query("select * from kosdaq where date = '%s'" % date)
+        forum_df = s.mongodb_read_today('forumdb', 'naverforum')\
+                    .withColumn('date', f.to_date(f.col('datetime')))
 
-    # get data
-    stock_df = s.postgresql_query("select * from kosdaq where date = '%s'" % date)
-    forum_df = s.mongodb_read('forumdb', 'naverforum') \
-                .filter(f.col('datetime').between(str(start_datetime), str(end_datetime)))\
-                .withColumn('datetime2', f.col('datetime') - f.expr('interval 9 hours'))\
-                .drop('datetime')\
-                .withColumnRenamed('datetime2', 'datetime')\
-                .withColumn('date', f.to_date(f.col('datetime')))\
+        Log.info("Stock data count: " + str(stock_df.count()))
+        Log.info("Forum data count: " + str(forum_df.count()))
 
-    Log.info("Stock data count: " + str(stock_df.count()))
-    Log.info("Forum data count: " + str(forum_df.count()))
+        # 형태소 분해 (Okt)
+        # forum_RDD = forum_df.rdd.map(lambda row: word.get_phrases_row(row, 'title'))
+        # print(type(forum_RDD))
+        # print(forum_RDD.collect())
 
-    # 형태소 분해 (Okt)
-    # forum_RDD = forum_df.rdd.map(lambda row: word.get_phrases_row(row, 'title'))
-    # print(type(forum_RDD))
-    # print(forum_RDD.collect())
+        agg_df = forum_df.groupby('code', 'date').agg(
+            f.count('_id').alias('forum_count'),
+            f.sum('view').alias('forum_view'),
+            f.sum('like').alias('forum_like'),
+            f.sum('unlike').alias('forum_unlike'),
+            f.avg(f.length('title')).alias('forum_title_length_avg'),
+            f.avg(f.length('content')).alias('forum_content_length_avg'),
+            f.sum('reply_count').alias('forum_reply_count')
+        )
 
-    agg_df = forum_df.groupby('code', 'date').agg(
-                f.count('_id').alias('forum_count'),
-                f.sum('view').alias('forum_view'),
-                f.sum('like').alias('forum_like'),
-                f.sum('unlike').alias('forum_unlike'),
-                f.avg(f.length('title')).alias('forum_title_length_avg'),
-                f.avg(f.length('content')).alias('forum_content_length_avg'),
-                f.sum('reply_count').alias('forum_reply_count')
-    )
+        spark_df = stock_df.join(agg_df, ['code', 'date'], 'left')
+        spark_df.show(5)
 
-    spark_df = stock_df.join(agg_df, ['code', 'date'], 'left')
-    spark_df.show(5)
+        # Hive 삽입
+        today_kosdaq_df = spark_df.toPandas()
+        today_kosdaq_df['year'] = date.year
+        today_kosdaq_df['month'] = date.month
+        today_kosdaq_df['day'] = date.day
+        today_kosdaq_df.rename(columns= {'date':'created'})
+        Log.info("Hive Insert")
+        h.Insert(today_kosdaq_df, 'stockdb', 'kosdaq')
+    except Exception as e:
+        Log.error(e)
+    finally:
+        spark_counter.end()
 
-    # Hive 삽입
-    today_kosdaq_df = spark_df.toPandas()
-    today_kosdaq_df['year'] = date.year
-    today_kosdaq_df['month'] = date.month
-    today_kosdaq_df['day'] = date.day
-    Log.info("Hive Insert")
-    Hive_Insert(today_kosdaq_df, 'stockdb')
 
-    spark_counter.end()

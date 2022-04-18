@@ -1,4 +1,7 @@
 import sys, os, io, platform, time
+
+import pandas as pd
+
 if 'Windows' not in platform.platform():
     os.environ['TZ'] = 'Asia/Seoul'
     time.tzset()
@@ -10,6 +13,7 @@ sys.path.append((os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
+import datetime
 from pyspark.sql import SparkSession
 
 class SparkJob(object):
@@ -46,5 +50,23 @@ class SparkJob(object):
                 .option("uri",uri)\
                 .option('database', db)\
                 .option('collection', collection) \
+                .load()
+        return df
+
+    def mongodb_read_today(self, db, collection):
+        # 일자 설정
+        # date = datetime.date(2022,3,22)
+        date = datetime.date.today()
+        start_datetime, end_datetime = datetime.datetime.combine(date, datetime.time(8, 0, 0)), datetime.datetime.combine(date, datetime.time(15, 30, 0))
+        # pipeline= "[{'$match': {'name':'디어유'}}]"
+        pipeline = {'$match': {'datetime':{'$gte': {'$date': start_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")},
+                                           '$lte': {'$date': end_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")}}}}
+        info = self.config.get("MONGO")
+        uri = "mongodb://{0}:{1}@{2}:27017/?authSource=admin".format(info['user'], info['pw'], info['ip'])
+        df = self.session.read.format('com.mongodb.spark.sql.DefaultSource') \
+                .option("uri",uri)\
+                .option('database', db)\
+                .option('collection', collection) \
+                .option('pipeline', pipeline)\
                 .load()
         return df

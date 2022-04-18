@@ -9,7 +9,6 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 from sqlalchemy import create_engine
-from pyhive import hive
 import pandas as pd
 
 class HiveJob(object):
@@ -18,71 +17,50 @@ class HiveJob(object):
         info = config.get("HIVE")
 
         self.Log = common.Logger(__file__)
-        self.connection = hive.Connection(
-            host=info['ip'], port=10000, username=info['user'], password=info['pw'],
-            auth='CUSTOM'
-            )
-        self.cursor = self.connection.cursor()
+        self.engine = create_engine('hive://%s:10000' % info['ip'])
 
-    def __del__(self):
-        if self.cursor:
-            self.cursor.close()
-        if self.connection:
-            self.connection.close()
+    def Read(self, sql):
+        return pd.read_sql(sql, self.engine)
 
-    def execute(self, query, args = {}):
-        self.cursor.execute(query, args)
-        try:
-            self.cursor.fetchall()
-        except Exception as e:
-            self.Log.error(e)
+    def Insert(self, df, db, table):
+        df.to_sql(schema=db, name=table, con=self.engine,
+                  index=False, method='multi', if_exists='append')
 
-def Hive_Insert(df, schema):
-    config = common.Config()
-    info = config.get("HIVE")
+    def CreateTable(self, schema, db, table):
+        query = ('''CREATE TABLE IF NOT EXISTS %s.%s %s
+        PARTITIONED BY (year int, month int, day int)
+        STORED AS PARQUET
+        ''') % (db, table, schema)
+        self.engine.execute(query)
 
-    engine = create_engine('hive://%s:10000/%s' % (info['ip'], schema))
-    df.to_sql(schema=schema, name='kosdaq',
-              con=engine, index=False, method='multi', if_exists='append')
+        df = pd.read_sql("select * from %s.%s" % (db, table), self.engine)
+        print(df)
 
-
-def CreateTable(db, table):
-    h = HiveJob()
-    schema = '(`code` string, ' \
-                 '`date` Date, ' \
-                 '`name` string, ' \
-                 '`market_cap` int, ' \
-                 '`price` int,' \
-                 '`open_price` int,' \
-                 '`high_price` int,' \
-                 '`low_price` int,' \
-                 '`gap` int,' \
-                 '`gap_ratio` float,' \
-                 '`trading_volume` int,' \
-                 '`institutional_volume` int,' \
-                 '`foreign_volume` int,' \
-                 '`foreign_ratio` float,' \
-                 '`forum_url` string,' \
-                 '`forum_count` int,' \
-                 '`forum_view` int,' \
-                 '`forum_like` int,' \
-                 '`forum_unlike`int,' \
-                 '`forum_title_length_avg` float,' \
-                 '`forum_content_length_avg` float,' \
-                 '`forum_reply_count` int)'
-    # table_format = ("PARQUET", "TEXTFILE", "AVRO",)
-    query = ('''CREATE TABLE IF NOT EXISTS %s.%s %s
-    PARTITIONED BY (year int, month int, day int)
-    STORED AS PARQUET
-    ''') % (db, table, schema)
-
-    print(query)
-    h.execute(query)
-
-    df = pd.read_sql("select * from %s.%s" % (db, table), h.connection)
-    print(df)
-
-# CreateTable('stockdb', 'kosdaq')
+# Create Table
+# schema = '(`code` string, ' \
+#          '`created` Date, ' \
+#          '`name` string, ' \
+#          '`market_cap` int, ' \
+#          '`price` int,' \
+#          '`open_price` int,' \
+#          '`high_price` int,' \
+#          '`low_price` int,' \
+#          '`gap` int,' \
+#          '`gap_ratio` float,' \
+#          '`trading_volume` int,' \
+#          '`institutional_volume` int,' \
+#          '`foreign_volume` int,' \
+#          '`foreign_ratio` float,' \
+#          '`forum_url` string,' \
+#          '`forum_count` int,' \
+#          '`forum_view` int,' \
+#          '`forum_like` int,' \
+#          '`forum_unlike`int,' \
+#          '`forum_title_length_avg` float,' \
+#          '`forum_content_length_avg` float,' \
+#          '`forum_reply_count` int)'
+# h = HiveJob()
+# h.CreateTable(schema, 'stockdb', 'kosdaq')
 
 
 
