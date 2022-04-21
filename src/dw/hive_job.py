@@ -22,10 +22,15 @@ class HiveJob(object):
     def Read(self, sql):
         return pd.read_sql(sql, self.engine)
 
+    # index: df의 index를 db의 칼럼으로 추가할지 여부
+    # method: multi일 경우, 다수의 행을 대상으로 한다
+    # if_exists: 만약 table이 존재할 경우, 뒤에 데이터를 붙인다
     def Insert(self, df, db, table):
         df.to_sql(schema=db, name=table, con=self.engine,
                   index=False, method='multi', if_exists='append')
 
+    # PARTITIONED BY: 파티셔닝을 통해서 데이터를 분할한다 (데이터 양을 제한하여 성능을 향상시킬수 있다)
+    # STORED AS PARQUET: 칼럼기반으로 데이터를 저장한다
     def CreateTable(self, schema, db, table):
         query = ('''CREATE TABLE IF NOT EXISTS %s.%s %s
         PARTITIONED BY (year int, month int, day int)
