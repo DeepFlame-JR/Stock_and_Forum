@@ -14,9 +14,9 @@
 1. 네이버 증권에서 주식 가격을 추출하여 PostgreSQL에 저장한다.
 2. 네이버 종목토론방의 정보를 추출하여 MongoDB에 저장한다.
 3. Spark로 Database에서 정보를 불러와 데이터를 처리한다.
-4. 처리된 데이터를 Hive에 저장한다. (진행중)
+4. 처리된 데이터를 Hive에 저장한다.
 5. 위 과정을 Airflow를 통해서 워크플로우 스케줄링을 한다. 
-6. Hive에 저장된 데이터를 tableau를 통해 시각화/분석한다. (예정)
+6. Hive에 저장된 데이터를 시각화  통해 시각화/분석한다. (예정)
 
 ## Work Flow
 <img width="80%" src="https://user-images.githubusercontent.com/40620421/154842090-05aec276-49ef-43a7-9722-ea27fcc9ca88.png"/>
