@@ -40,8 +40,6 @@ if __name__ == '__main__':
 
         # 형태소 분해 (Okt)
         # forum_RDD = forum_df.rdd.map(lambda row: word.get_phrases_row(row, 'title'))
-        # print(type(forum_RDD))
-        # print(forum_RDD.collect())
 
         agg_df = forum_df.groupby('code', 'date').agg(
             f.count('_id').alias('forum_count'),

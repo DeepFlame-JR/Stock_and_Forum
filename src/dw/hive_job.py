@@ -41,7 +41,7 @@ class HiveJob(object):
         df = pd.read_sql("select * from %s.%s" % (db, table), self.engine)
         print(df)
 
-# Create Table
+# # Create Table
 # schema = '(`code` string, ' \
 #          '`created` Date, ' \
 #          '`name` string, ' \

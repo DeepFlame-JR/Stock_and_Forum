@@ -58,7 +58,6 @@ class SparkJob(object):
         # date = datetime.date(2022,3,22)
         date = datetime.date.today()
         start_datetime, end_datetime = datetime.datetime.combine(date, datetime.time(8, 0, 0)), datetime.datetime.combine(date, datetime.time(15, 30, 0))
-        # pipeline= "[{'$match': {'name':'디어유'}}]"
         pipeline = {'$match': {'datetime':{'$gte': {'$date': start_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")},
                                            '$lte': {'$date': end_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")}}}}
         info = self.config.get("MONGO")
