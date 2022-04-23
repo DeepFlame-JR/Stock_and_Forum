@@ -16,12 +16,10 @@ from pyspark.sql import SQLContext
 import datetime
 import pandas as pd
 
-if __name__ == '__main__':
+def ETL(date):
     Log = common.Logger(__file__)
     spark_counter = common.TimeCounter('Spark Operation')
     try:
-        date = datetime.date.today()
-        # date = datetime.date(2022,4,18)
         s = SparkJob()
         h = HiveJob()
 
@@ -32,10 +30,12 @@ if __name__ == '__main__':
 
         # get data
         stock_df = s.postgresql_query("select * from kosdaq where date = '%s'" % date)
-        forum_df = s.mongodb_read_today('forumdb', 'naverforum')\
-                    .withColumn('date', f.to_date(f.col('datetime')))
-
+        if stock_df.count() == 0:
+            raise Exception('today is not the opening date')
         Log.info("Stock data count: " + str(stock_df.count()))
+
+        forum_df = s.mongodb_read_date('forumdb', 'naverforum', date)\
+                    .withColumn('date', f.to_date(f.col('datetime')))
         Log.info("Forum data count: " + str(forum_df.count()))
 
         # 형태소 분해 (Okt)
@@ -66,5 +66,8 @@ if __name__ == '__main__':
         Log.error(e)
     finally:
         spark_counter.end()
+
+if __name__ == '__main__':
+    ETL(datetime.date.today())
 
 

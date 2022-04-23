@@ -53,10 +53,10 @@ class SparkJob(object):
                 .load()
         return df
 
-    def mongodb_read_today(self, db, collection):
+    def mongodb_read_date(self, db, collection, date=None):
         # 일자 설정
-        # date = datetime.date(2022,3,22)
-        date = datetime.date.today()
+        if not date:
+            date = datetime.date.today()
         start_datetime, end_datetime = datetime.datetime.combine(date, datetime.time(8, 0, 0)), datetime.datetime.combine(date, datetime.time(15, 30, 0))
         pipeline = {'$match': {'datetime':{'$gte': {'$date': start_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")},
                                            '$lte': {'$date': end_datetime.strftime("%Y-%m-%dT%H:%M:%SZ")}}}}
