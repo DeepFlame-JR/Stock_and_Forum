@@ -1,5 +1,5 @@
 # 주식 가격과 종목토로방
-주식 가격과 네이버 종목토론방의 내용을 일자 별로 수집 및 시각화/분석
+주식 가격과 네이버 종목토론방의 내용을 일자 별로 수집
 
 ## Purpose
 네이버 종목토론방의 여론과 주식 가격의 연관성 분석      
@@ -16,10 +16,9 @@
 3. Spark로 Database에서 정보를 불러와 데이터를 처리한다.
 4. 처리된 데이터를 Hive에 저장한다.
 5. 위 과정을 Airflow를 통해서 워크플로우 스케줄링을 한다. 
-6. Hive에 저장된 데이터를 시각화  통해 시각화/분석한다. (예정)
 
 ## Work Flow
-<img width="80%" src="https://user-images.githubusercontent.com/40620421/154842090-05aec276-49ef-43a7-9722-ea27fcc9ca88.png"/>
+<img width="70%" src="https://user-images.githubusercontent.com/40620421/165786159-286f6c35-90b4-4651-89c7-9fb926b07b12.png"/>
    
    
 ## Environment
@@ -27,8 +26,8 @@ GCP(Google Cloud Platform)
 Ubuntu:20.04   
 - Python
 - Hadoop
-- Apache Spark
-- Apache Hive
-- Apache Airflow (with Docker)
+- Spark
+- Hive
+- Airflow (with Docker)
 - PostgreSQL
 - MongoDB
