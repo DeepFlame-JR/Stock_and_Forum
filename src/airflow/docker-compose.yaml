@@ -61,6 +61,10 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_FOLDER: '/opt/airflow/toy/src/airflow'
     AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: 'UTC'
     AIRFLOW__SCHEDULER__CATCHUP_BY_DEFAULT: 'false'
+    AIRFLOW__SMTP__SMTP_HOST: 'smtp.gmail.com'
+    AIRFLOW__SMTP__SMTP_USER: 'email'
+    AIRFLOW__SMTP__SMTP_PASSWORD: 'password'
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: 'airflow@noreply.com'
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

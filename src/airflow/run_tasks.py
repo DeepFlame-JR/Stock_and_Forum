@@ -9,7 +9,9 @@ sys.path.append(src_folder)
 import datetime
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.email import EmailOperator
+from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 
 default_args = {
@@ -19,6 +21,7 @@ default_args = {
     'retry_delay': datetime.timedelta(minutes=5),
     }
 
+# DAG 작성
 dag = DAG(
     dag_id='get_data',
     default_args=default_args,
@@ -26,19 +29,15 @@ dag = DAG(
     catchup=False,
     )
 
-stock = BashOperator(task_id='get_stock',
-                     bash_command='python3 %s/data/stock.py' % src_folder,
-                     dag=dag)
+stock = BashOperator(
+    task_id='get_stock',
+    bash_command='python3 %s/data/stock.py' % src_folder,
+    dag=dag)
 
-# DAG 작성
 def execute_forum(start, end, port, **kwargs):
     from data import forum
     forum.main_get_forum(start, end, port)
     return "Executor End"
-
-etl = BashOperator(task_id='ETL',
-                   bash_command='python3 %s/dw/spark_run.py' % src_folder,
-                   dag=dag)
 
 forum_tasks = {}
 for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
@@ -50,5 +49,39 @@ for i, f in enumerate(["f1", "f2", "f3", "f4", "f5"]):
     )
     forum_tasks[f] = task
 
+etl = BashOperator(
+    task_id='ETL',
+    bash_command='python3 %s/dw/spark_run.py' % src_folder,
+    dag=dag)
+
+def which_path():
+    from dw import hive_job
+    if hive_job.CheckTodayData() == 50:
+        task_id = 'Success'
+    else:
+        task_id = 'Send_Email'
+    return task_id
+
+check_etl = BranchPythonOperator(
+    task_id='Check_ETL',
+    python_callable=which_path,
+    dag=dag)
+
+send_email = EmailOperator(
+    task_id='Send_Email',
+    to='wnsfuf0121@naver.com',
+    subject='ETL Error',
+    html_content='ETL 후 데이터 수에 문제가 있습니다',
+    dag=dag
+)
+
+success = DummyOperator(
+    task_id='Success',
+    dag=dag
+)
+
 stock >> forum_tasks["f1"] >> forum_tasks["f5"] >> etl
 stock >> forum_tasks["f2"] >> forum_tasks["f3"] >> forum_tasks["f4"] >> etl
+
+etl >> check_etl >> success
+etl >> check_etl >> send_email

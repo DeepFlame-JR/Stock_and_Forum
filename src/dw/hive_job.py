@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from util import database, common
 
 from sqlalchemy import create_engine
+import datetime
 import pandas as pd
 
 class HiveJob(object):
@@ -40,6 +41,11 @@ class HiveJob(object):
 
         df = pd.read_sql("select * from %s.%s" % (db, table), self.engine)
         print(df)
+
+def CheckTodayData():
+    h = HiveJob()
+    today_df = h.Read("select * from stockdb.kosdaq where created='%s'" % datetime.date.today())
+    return len(today_df)
 
 # # Create Table
 # schema = '(`code` string, ' \
