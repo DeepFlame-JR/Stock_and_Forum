@@ -42,9 +42,9 @@ class HiveJob(object):
         df = pd.read_sql("select * from %s.%s" % (db, table), self.engine)
         print(df)
 
-def CheckTodayData():
+def CheckHiveData(date):
     h = HiveJob()
-    today_df = h.Read("select * from stockdb.kosdaq where created='%s'" % datetime.date.today())
+    today_df = h.Read("select * from stockdb.kosdaq where created='%s'" % date)
     return len(today_df)
 
 # # Create Table

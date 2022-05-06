@@ -56,7 +56,9 @@ etl = BashOperator(
 
 def which_path():
     from dw import hive_job
-    if hive_job.CheckTodayData() == 50:
+    from data import stock
+    today = datetime.date.today()
+    if stock.check_stock_opening_date(today, '005930') and hive_job.CheckHiveData() == 50:
         task_id = 'Success'
     else:
         task_id = 'Send_Email'
