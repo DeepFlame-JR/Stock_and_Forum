@@ -130,6 +130,14 @@ def main_get_forum(start, end, port):
             options.add_argument('--no-sandbox')
             options.add_argument("--single-process")
             options.add_argument("--disable-dev-shm-usage")
+            proxy = "%s:%s" % (info['ip'], port)
+            webdriver.DesiredCapabilities.CHROME['proxy'] = {
+                "httpProxy":proxy,
+                "ftpProxy":proxy,
+                "sslProxy":proxy,
+                "proxyType": "MANUAL",
+            }
+            webdriver.DesiredCapabilities.CHROME['acceptSslCerts'] = True
             driver = webdriver.Remote('http://%s:%s'%(info['ip'], port), options=options)
         else:
             driver = Chrome(service=Service(ChromeDriverManager().install()), chrome_options=options)
