@@ -17,7 +17,7 @@
 4. 처리된 데이터를 Hive에 저장한다.
 5. 위 과정을 Airflow를 통해서 워크플로우 스케줄링을 한다. 
 
-## Work Flow
+## Data Flow
 <img width="70%" src="https://user-images.githubusercontent.com/40620421/165786159-286f6c35-90b4-4651-89c7-9fb926b07b12.png"/>
    
    
